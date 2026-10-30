@@ -1,0 +1,181 @@
+{% extends "base.html" %}
+{% block title %}Faculty Dashboard - AI Group Project Team Builder{% endblock %}
+
+{% block content %}
+<div class="row g-4 py-2">
+    <!-- Top Greeting & Header -->
+    <div class="col-12">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+            <div>
+                <div class="d-flex align-items-center gap-2 mb-1">
+                    <h1 class="h3 fw-bold mb-0 text-dark">Faculty &amp; Evaluation Control Center</h1>
+                    <span class="badge bg-primary bg-opacity-10 text-primary border border-primary-subtle fw-semibold">Academic Review Active</span>
+                </div>
+                <p class="text-secondary mb-0">Manage course projects, evaluate deterministic baseline vs. Scikit-learn K-Means matching, and finalize student teams.</p>
+            </div>
+            <div class="d-flex flex-wrap gap-2">
+                <a href="{{ url_for('faculty.project_create') }}" class="btn btn-primary shadow-sm">
+                    <i class="bi bi-plus-circle-fill me-1"></i>New Academic Project
+                </a>
+                <a href="{{ url_for('faculty.model_status') }}" class="btn btn-outline-purple shadow-sm">
+                    <i class="bi bi-cpu me-1"></i>ML Readiness
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stat Metric Cards -->
+    <div class="col-12">
+        <div class="row g-3">
+            <div class="col-12 col-sm-6 col-xl-3">
+                <div class="stat-card stat-card-accent-primary">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="text-muted small text-uppercase fw-bold">Student Cohort</div>
+                            <div class="stat-card-number text-dark">{{ total_students }}</div>
+                            <div class="text-success small fw-semibold"><i class="bi bi-patch-check-fill me-1"></i>{{ complete_profiles }} verified complete</div>
+                        </div>
+                        <div class="stat-icon-wrapper" style="background: rgba(99, 102, 241, 0.12); color: #4f46e5;">
+                            <i class="bi bi-people-fill"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 col-sm-6 col-xl-3">
+                <div class="stat-card stat-card-accent-blue">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="text-muted small text-uppercase fw-bold">Course Projects</div>
+                            <div class="stat-card-number text-dark">{{ total_projects }}</div>
+                            <div class="text-info small fw-semibold"><i class="bi bi-kanban-fill me-1"></i>Real-world capstones</div>
+                        </div>
+                        <div class="stat-icon-wrapper" style="background: rgba(2, 132, 199, 0.12); color: #0284c7;">
+                            <i class="bi bi-kanban-fill"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 col-sm-6 col-xl-3">
+                <div class="stat-card stat-card-accent-purple">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="text-muted small text-uppercase fw-bold">Algorithmic Runs</div>
+                            <div class="stat-card-number text-dark">{{ active_runs }}</div>
+                            <div class="small fw-semibold" style="color: #7c3aed;"><i class="bi bi-cpu-fill me-1"></i>Baseline &amp; K-Means</div>
+                        </div>
+                        <div class="stat-icon-wrapper" style="background: rgba(168, 85, 247, 0.12); color: #7c3aed;">
+                            <i class="bi bi-diagram-3-fill"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 col-sm-6 col-xl-3">
+                <div class="stat-card stat-card-accent-green">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="text-muted small text-uppercase fw-bold">Finalized Teams</div>
+                            <div class="stat-card-number text-dark">{{ finalized_teams }}</div>
+                            <div class="text-success small fw-semibold"><i class="bi bi-shield-check me-1"></i>Published to students</div>
+                        </div>
+                        <div class="stat-icon-wrapper" style="background: rgba(16, 185, 129, 0.12); color: #10b981;">
+                            <i class="bi bi-trophy-fill"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Active Academic Projects Management Table -->
+    <div class="col-12">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center py-3">
+                <span class="fw-bold text-dark"><i class="bi bi-kanban-fill me-2 text-primary"></i>Academic Capstone Projects &amp; Team Formations</span>
+                <a href="{{ url_for('faculty.project_create') }}" class="btn btn-sm btn-outline-primary">
+                    <i class="bi bi-plus me-1"></i>Create Project
+                </a>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th style="min-width: 250px;">Project Title &amp; Domain</th>
+                            <th>Team Target</th>
+                            <th style="min-width: 280px;">Required Technical Skills</th>
+                            <th>Roles Needed</th>
+                            <th>Status</th>
+                            <th class="text-end" style="min-width: 220px;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for p in projects %}
+                            <tr>
+                                <td>
+                                    <div class="fw-bold text-dark fs-6">{{ p.title }}</div>
+                                    <div class="mt-1">
+                                        <span class="domain-pill {% if 'Health' in p.domain %}domain-health{% elif 'Fin' in p.domain %}domain-fintech{% elif 'IoT' in p.domain %}domain-iot{% elif 'Cyber' in p.domain %}domain-cyber{% else %}domain-web{% endif %} small">
+                                            {{ p.domain }}
+                                        </span>
+                                    </div>
+                                    <div class="text-muted small mt-1">{{ p.description|truncate(80) }}</div>
+                                </td>
+                                <td>
+                                    <span class="fw-bold fs-5 text-primary">{{ p.desired_team_size }}</span>
+                                    <div class="text-muted small" style="font-size: 0.72rem;">({{ p.min_team_size }} - {{ p.max_team_size }} allowed)</div>
+                                </td>
+                                <td>
+                                    <div class="d-flex flex-wrap gap-1">
+                                        {% for rs in p.required_skills[:3] %}
+                                            <span class="req-pill {% if rs.is_mandatory %}req-pill-mand{% endif %}" style="font-size: 0.75rem; padding: 0.2rem 0.5rem;">
+                                                <strong>{{ rs.skill.name }}</strong> &ge; L{{ rs.min_proficiency }}
+                                            </span>
+                                        {% endfor %}
+                                        {% if p.required_skills|length > 3 %}
+                                            <span class="badge bg-light text-muted border small">+{{ p.required_skills|length - 3 }} more</span>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="badge bg-light text-dark border">
+                                        {{ p.required_roles|length }} Roles
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="badge {% if p.status == 'Open' %}bg-success{% elif p.status == 'Formed' %}bg-info text-dark{% else %}bg-secondary{% endif %} fw-semibold">
+                                        {{ p.status }}
+                                    </span>
+                                </td>
+                                <td class="text-end">
+                                    <div class="btn-group btn-group-sm">
+                                        <a href="{{ url_for('generation.project_generation_setup', project_id=p.id) }}" class="btn btn-primary" title="Generate Teams">
+                                            <i class="bi bi-gear-fill me-1"></i>Generate
+                                        </a>
+                                        <a href="{{ url_for('comparison.compare_project_runs', project_id=p.id) }}" class="btn btn-outline-purple" title="Compare Baseline vs ML">
+                                            <i class="bi bi-bar-chart-fill me-1"></i>Compare
+                                        </a>
+                                        <a href="{{ url_for('report.project_reports', project_id=p.id) }}" class="btn btn-outline-secondary" title="Export Reports & CSV">
+                                            <i class="bi bi-file-earmark-arrow-down"></i>
+                                        </a>
+                                        <a href="{{ url_for('faculty.project_edit', project_id=p.id) }}" class="btn btn-outline-secondary" title="Edit Specifications">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% else %}
+                            <tr>
+                                <td colspan="6" class="text-center py-4 text-muted">
+                                    No academic projects created yet. Click "Create Project" to get started.
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

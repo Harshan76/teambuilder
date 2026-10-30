@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}Login - AI Group Project Team Builder{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center py-4">
+    <div class="col-12 col-md-8 col-lg-5">
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-body p-4 p-md-5">
+                <div class="text-center mb-4">
+                    <div class="d-inline-flex p-3 bg-primary bg-opacity-10 text-primary rounded-circle mb-3">
+                        <i class="bi bi-diagram-3-fill fs-2"></i>
+                    </div>
+                    <h1 class="h3 fw-bold mb-1">Sign In</h1>
+                    <p class="text-secondary small">Access the Intelligent Team Formation System</p>
+                </div>
+
+                <!-- Demo Account Quick Fill Buttons -->
+                <div class="p-3 bg-light rounded-3 mb-4 border">
+                    <div class="small fw-bold text-uppercase text-muted mb-2">
+                        <i class="bi bi-key-fill text-warning me-1"></i>Demo Accounts (1-Click Fill)
+                    </div>
+                    <div class="d-grid gap-2 d-sm-flex">
+                        <button type="button" class="btn btn-outline-primary btn-sm flex-fill" id="fill-faculty-btn">
+                            <i class="bi bi-mortarboard me-1"></i>Faculty Demo
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary btn-sm flex-fill" id="fill-student-btn">
+                            <i class="bi bi-person me-1"></i>Student Demo
+                        </button>
+                    </div>
+                </div>
+
+                <form method="POST" action="{{ url_for('auth.login') }}">
+                    <div class="mb-3">
+                        <label for="email" class="form-label fw-semibold">Email Address</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+                            <input type="email" class="form-control" id="email" name="email" required placeholder="name@college.edu">
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="password" class="form-label fw-semibold">Password</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                            <input type="password" class="form-control" id="password" name="password" required placeholder="••••••••">
+                        </div>
+                    </div>
+
+                    <div class="d-grid mb-3">
+                        <button type="submit" class="btn btn-primary btn-lg fw-semibold">
+                            <i class="bi bi-box-arrow-in-right me-1"></i>Sign In
+                        </button>
+                    </div>
+                </form>
+
+                <div class="text-center text-secondary small">
+                    Need an account? <a href="{{ url_for('auth.register') }}" class="text-decoration-none fw-semibold">Register as Student or Faculty</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="alert alert-light border small text-secondary">
+            <i class="bi bi-info-circle-fill text-primary me-1"></i>
+            <strong>Evaluation Notice:</strong> This platform demonstrates both a <em>Rule-Based Baseline</em> and an <em>Unsupervised Scikit-Learn K-Means Archetype</em> team formation engine on identical student cohorts.
+        </div>
+    </div>
+</div>
+{% endblock %}

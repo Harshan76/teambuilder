@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+{% block title %}Team Review & Manual Override - {{ project.title }}{% endblock %}
+
+{% block content %}
+<div class="row g-4 py-2">
+    <!-- Header -->
+    <div class="col-12">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+            <div>
+                <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
+                    <h1 class="h3 fw-bold mb-0">Team Review &amp; Manual Override</h1>
+                    <span class="{% if run.method == 'baseline' %}badge-baseline{% else %}badge-ml{% endif %}">
+                        Run #{{ run.id }} &bull; {{ run.method|upper }}
+                    </span>
+                    <span class="badge {% if teams[0].status == 'Finalized' %}bg-success bg-opacity-10 text-success border border-success-subtle{% else %}bg-warning bg-opacity-10 text-warning-emphasis border border-warning-subtle{% endif %} fw-semibold">
+                        <i class="bi bi-circle-fill me-1" style="font-size: 0.5rem;"></i>{{ teams[0].status }}
+                    </span>
+                </div>
+                <p class="text-secondary mb-0">Project: <strong>{{ project.title }}</strong> &bull; Reassign members or adjust roles before final publishing to students.</p>
+            </div>
+            <div class="d-flex flex-wrap gap-2">
+                <form method="POST">
+                    <input type="hidden" name="action" value="finalize">
+                    <button type="submit" class="btn btn-success fw-semibold" onclick="return confirm('Lock and publish these finalized teams to students?');">
+                        <i class="bi bi-shield-check me-1"></i>Approve &amp; Finalize Teams
+                    </button>
+                </form>
+                <a href="{{ url_for('comparison.compare_project_runs', project_id=project.id) }}" class="btn btn-outline-secondary">
+                    <i class="bi bi-bar-chart me-1"></i>Comparison
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Interactive Instruction Box -->
+    <div class="col-12">
+        <div class="alert alert-light border small text-secondary d-flex align-items-center gap-3 mb-0 p-3 shadow-sm" style="border-left: 4px solid #4f46e5 !important;">
+            <i class="bi bi-sliders text-primary fs-3"></i>
+            <div>
+                <strong class="text-dark">Faculty Review & Manual Control:</strong>
+                Adjust recommended roles directly using the role dropdowns (updates database immediately via REST API) or move a student to another team using the "Move to Team" selector. Once approved and locked, team assignments become visible on student dashboards.
+            </div>
+        </div>
+    </div>
+
+    <!-- Teams Review Columns/Cards -->
+    <div class="col-12">
+        <div class="row g-4">
+            {% for t in teams %}
+                <div class="col-12 col-xl-6">
+                    <div class="card shadow-sm h-100 team-card border-0">
+                        <div class="card-header bg-white d-flex justify-content-between align-items-center py-3">
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="stat-icon-wrapper" style="width: 32px; height: 32px; background: #eef2ff; color: #4f46e5; border-radius: 0.5rem; font-size: 0.9rem;">
+                                    <i class="bi bi-people-fill"></i>
+                                </span>
+                                <h5 class="fw-bold mb-0 text-dark">{{ t.name }}</h5>
+                            </div>
+                            <span class="badge bg-light text-dark border">{{ t.members|length }} Members</span>
+                        </div>
+                        <div class="card-body p-3">
+                            {% for m in t.members %}
+                                <div class="p-3 border rounded-3 bg-light mb-3">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <div class="d-flex align-items-center gap-3">
+                                            <div class="avatar-initials" style="width: 38px; height: 38px;">
+                                                {{ m.profile.user.full_name[:2]|upper }}
+                                            </div>
+                                            <div>
+                                                <div class="fw-bold fs-6 text-dark">{{ m.profile.user.full_name }}</div>
+                                                <div class="text-muted small">
+                                                    <span class="badge bg-white text-secondary border me-1">{{ m.profile.student_id }}</span>
+                                                    {{ m.profile.department }} &bull; {{ m.profile.experience_level }}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="text-end">
+                                            <span class="badge bg-primary" id="role-badge-{{ m.id }}">
+                                                {{ m.assigned_role.name if m.assigned_role else 'Member' }}
+                                            </span>
+                                            {% if m.cluster_label %}
+                                                <div class="cluster-badge small mt-1" style="font-size: 0.7rem;">
+                                                    {{ m.cluster_label }}
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+
+                                    <!-- Interactive Controls -->
+                                    <div class="row g-2 align-items-center pt-2 border-top mt-2">
+                                        <div class="col-12 col-sm-6">
+                                            <label class="form-label small text-muted mb-1 fw-semibold">Override Assigned Role:</label>
+                                            <select class="form-select form-select-sm role-override-select" data-member-id="{{ m.id }}">
+                                                {% for r in roles %}
+                                                    <option value="{{ r.id }}" {% if m.assigned_role_id == r.id %}selected{% endif %}>
+                                                        {{ r.name }}
+                                                    </option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                        <div class="col-12 col-sm-6">
+                                            <label class="form-label small text-muted mb-1 fw-semibold">Move to Different Team:</label>
+                                            <select class="form-select form-select-sm team-reassign-select" data-member-id="{{ m.id }}">
+                                                <option value="">-- Move to Team --</option>
+                                                {% for target_t in teams %}
+                                                    {% if target_t.id != t.id %}
+                                                        <option value="{{ target_t.id }}">{{ target_t.name }}</option>
+                                                    {% endif %}
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{{ url_for('static', filename='js/team_review.js') }}"></script>
+{% endblock %}

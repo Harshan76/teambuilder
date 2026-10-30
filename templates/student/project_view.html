@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{% block title %}Course Projects Catalog - AI Group Project Team Builder{% endblock %}
+
+{% block content %}
+<div class="row g-4 py-2">
+    <!-- Header -->
+    <div class="col-12">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+            <div>
+                <h1 class="h3 fw-bold mb-1 text-dark">Course Projects &amp; Requirements</h1>
+                <p class="text-secondary mb-0">Browse real-world academic projects, tech stacks, mandatory prerequisites, and needed team roles.</p>
+            </div>
+            <a href="{{ url_for('student.dashboard') }}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-1"></i>Back to Portal
+            </a>
+        </div>
+    </div>
+
+    <!-- Projects Grid -->
+    <div class="col-12">
+        <div class="row g-4">
+            {% for p in projects %}
+                <div class="col-12 col-lg-6">
+                    <div class="card project-card shadow-sm h-100">
+                        <div class="card-header bg-white d-flex justify-content-between align-items-center py-3">
+                            <span class="domain-pill {% if 'Health' in p.domain %}domain-health{% elif 'Fin' in p.domain %}domain-fintech{% elif 'IoT' in p.domain %}domain-iot{% elif 'Cyber' in p.domain %}domain-cyber{% else %}domain-web{% endif %}">
+                                <i class="bi bi-tag-fill me-1"></i>{{ p.domain }}
+                            </span>
+                            <span class="badge {% if p.status == 'Open' %}bg-success{% elif p.status == 'Formed' %}bg-info text-dark{% else %}bg-secondary{% endif %} fw-bold px-3 py-2">
+                                {{ p.status }}
+                            </span>
+                        </div>
+                        <div class="card-body p-4 d-flex flex-column justify-content-between">
+                            <div>
+                                <h4 class="card-title fw-bold text-dark mb-2">{{ p.title }}</h4>
+                                <p class="card-text text-secondary mb-3">{{ p.description }}</p>
+
+                                <!-- Team Specs Row -->
+                                <div class="p-3 bg-light rounded-3 mb-3 border">
+                                    <div class="row g-2 text-center">
+                                        <div class="col-4">
+                                            <div class="small text-muted text-uppercase fw-semibold" style="font-size: 0.72rem;">Target Size</div>
+                                            <div class="fw-bold fs-4 text-primary">{{ p.desired_team_size }}</div>
+                                            <div class="text-muted small" style="font-size: 0.7rem;">Students</div>
+                                        </div>
+                                        <div class="col-4 border-start border-end">
+                                            <div class="small text-muted text-uppercase fw-semibold" style="font-size: 0.72rem;">Allowed Bounds</div>
+                                            <div class="fw-bold fs-4 text-dark">{{ p.min_team_size }} - {{ p.max_team_size }}</div>
+                                            <div class="text-muted small" style="font-size: 0.7rem;">Min to Max</div>
+                                        </div>
+                                        <div class="col-4">
+                                            <div class="small text-muted text-uppercase fw-semibold" style="font-size: 0.72rem;">Prerequisite</div>
+                                            <div class="fw-bold fs-4 text-warning" style="font-size: 1.25rem;">{{ p.experience_level_required }}</div>
+                                            <div class="text-muted small" style="font-size: 0.7rem;">Experience</div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Required Skills -->
+                                <div class="mb-3">
+                                    <div class="fw-bold small text-uppercase text-muted mb-2">Technical Competencies Required:</div>
+                                    <div class="d-flex flex-wrap gap-1">
+                                        {% for rs in p.required_skills %}
+                                            <span class="req-pill {% if rs.is_mandatory %}req-pill-mand{% endif %}">
+                                                <strong>{{ rs.skill.name }}</strong>
+                                                <span class="badge bg-primary">&ge; Level {{ rs.min_proficiency }}</span>
+                                                {% if rs.is_mandatory %}
+                                                    <span class="badge bg-danger small" style="font-size: 0.65rem;">Mandatory</span>
+                                                {% else %}
+                                                    <span class="badge bg-secondary small" style="font-size: 0.65rem;">Preferred</span>
+                                                {% endif %}
+                                            </span>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+
+                                <!-- Required Roles -->
+                                <div>
+                                    <div class="fw-bold small text-uppercase text-muted mb-2">Required Team Roles:</div>
+                                    <div class="d-flex flex-wrap gap-1">
+                                        {% for rr in p.required_roles %}
+                                            <span class="role-badge">
+                                                <i class="bi bi-person-fill me-1"></i>{{ rr.role.name }} &times; {{ rr.count_needed }}
+                                            </span>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% else %}
+                <div class="col-12 text-center py-5 text-muted">
+                    No academic projects registered in system.
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

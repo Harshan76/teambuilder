@@ -1,0 +1,215 @@
+{% extends "base.html" %}
+{% block title %}Student Dossier - {{ profile.user.full_name }} | AI Team Builder{% endblock %}
+
+{% block content %}
+<div class="row g-4 py-2">
+    <!-- Header Hero Banner -->
+    <div class="col-12">
+        <div class="card shadow-sm border-0 p-4" style="background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="avatar-initials avatar-initials-lg">
+                        {{ profile.user.full_name[:2]|upper }}
+                    </div>
+                    <div>
+                        <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
+                            <h1 class="h3 fw-bold mb-0 text-dark">{{ profile.user.full_name }}</h1>
+                            <span class="badge bg-light text-dark border">{{ profile.student_id }}</span>
+                            {% if is_complete %}
+                                <span class="badge bg-success bg-opacity-10 text-success border border-success-subtle fw-semibold">
+                                    <i class="bi bi-patch-check-fill me-1"></i>Verified Complete
+                                </span>
+                            {% else %}
+                                <span class="badge bg-warning bg-opacity-10 text-warning-emphasis border border-warning-subtle fw-semibold">
+                                    <i class="bi bi-clock-history me-1"></i>Profile Incomplete ({{ completion_pct }}%)
+                                </span>
+                            {% endif %}
+                        </div>
+                        <p class="text-secondary mb-0">
+                            <i class="bi bi-envelope me-1"></i>{{ profile.user.email }} &bull;
+                            <i class="bi bi-building me-1"></i>Department of {{ profile.department }} &bull;
+                            <span class="badge bg-secondary bg-opacity-10 text-secondary border">{{ profile.experience_level }}</span>
+                        </p>
+                    </div>
+                </div>
+                <div class="d-flex gap-2">
+                    <a href="{{ url_for('faculty.students_list') }}" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-left me-1"></i>Cohort Directory
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Left Column: Academic Background & Preferences -->
+    <div class="col-12 col-lg-4">
+        <!-- Academic Background Card -->
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-white fw-bold">
+                <i class="bi bi-mortarboard-fill text-primary me-2"></i>Academic Background
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <div class="text-muted small">Experience Level:</div>
+                    <div class="fw-bold fs-6 text-dark">
+                        {{ profile.experience_level }}
+                        <span class="badge bg-light text-secondary border ms-1">{{ profile.experience_years }} Years</span>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <div class="text-muted small">Collaboration Preference:</div>
+                    <div class="fw-semibold text-secondary">{{ profile.collaboration_preference or 'Flexible / Cross-Functional' }}</div>
+                </div>
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <span class="text-muted small">Profile Completion:</span>
+                        <span class="fw-bold small {% if is_complete %}text-success{% else %}text-warning{% endif %}">{{ completion_pct }}%</span>
+                    </div>
+                    <div class="progress" style="height: 8px; border-radius: 9999px;">
+                        <div class="progress-bar {% if is_complete %}bg-success{% else %}bg-warning{% endif %}" style="width: {{ completion_pct }}%;"></div>
+                    </div>
+                </div>
+                {% if missing %}
+                    <div class="alert alert-warning py-2 px-3 small border-0 bg-warning bg-opacity-10 mb-0">
+                        <strong><i class="bi bi-exclamation-triangle-fill me-1"></i>Missing Sections:</strong>
+                        <ul class="mb-0 ps-3 mt-1">
+                            {% for m in missing %}
+                                <li>{{ m }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Weekly Meeting Slots -->
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-white fw-bold d-flex justify-content-between align-items-center">
+                <span><i class="bi bi-calendar3 text-primary me-2"></i>Weekly Meeting Slots</span>
+                <span class="badge bg-light text-secondary border">{{ profile.availability|length }}</span>
+            </div>
+            <div class="card-body">
+                {% for sa in profile.availability %}
+                    <div class="p-2 border rounded-3 mb-2 bg-light d-flex justify-content-between align-items-center">
+                        <div>
+                            <span class="fw-bold small text-dark"><i class="bi bi-clock-fill text-success me-1"></i>{{ sa.slot.slot_name }}</span>
+                        </div>
+                        <span class="badge bg-white text-muted border" style="font-size: 0.72rem;">{{ sa.slot.time_range }}</span>
+                    </div>
+                {% else %}
+                    <div class="text-muted small py-2 text-center">No meeting availability recorded.</div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Preferred Roles Card -->
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-white fw-bold">
+                <i class="bi bi-person-badge-fill text-primary me-2"></i>Preferred Team Roles
+            </div>
+            <div class="card-body">
+                {% for spr in profile.preferred_roles|sort(attribute='preference_rank') %}
+                    <div class="d-flex justify-content-between align-items-center mb-2 p-2 border rounded-3 bg-light">
+                        <span class="fw-bold small {% if spr.preference_rank == 1 %}text-primary{% elif spr.preference_rank == 2 %}text-info{% else %}text-secondary{% endif %}">
+                            <i class="bi bi-award-fill me-1"></i>Rank #{{ spr.preference_rank }}
+                        </span>
+                        {% set rname = spr.role.name %}
+                        {% if 'Backend' in rname %}
+                            <span class="role-badge role-badge-backend">{{ rname }}</span>
+                        {% elif 'Frontend' in rname %}
+                            <span class="role-badge role-badge-frontend">{{ rname }}</span>
+                        {% elif 'ML' in rname or 'Data' in rname %}
+                            <span class="role-badge role-badge-data">{{ rname }}</span>
+                        {% elif 'DevOps' in rname or 'QA' in rname %}
+                            <span class="role-badge role-badge-qa">{{ rname }}</span>
+                        {% elif 'Design' in rname or 'UI' in rname %}
+                            <span class="role-badge role-badge-designer">{{ rname }}</span>
+                        {% else %}
+                            <span class="role-badge role-badge-coordinator">{{ rname }}</span>
+                        {% endif %}
+                    </div>
+                {% else %}
+                    <div class="text-muted small py-2 text-center">No preferred roles submitted.</div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Column: Skills, Interests & Project Portfolio -->
+    <div class="col-12 col-lg-8">
+        <!-- Technical Skill Proficiencies -->
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center py-3">
+                <span class="fw-bold fs-6">
+                    <i class="bi bi-code-slash text-primary me-2"></i>Technical Skill Proficiencies (Scale 1-5)
+                </span>
+                <span class="badge bg-primary bg-opacity-10 text-primary border border-primary-subtle px-2 py-1">
+                    {{ profile.skills|length }} Verified Skills
+                </span>
+            </div>
+            <div class="card-body p-4">
+                <div class="row g-3">
+                    {% for ss in profile.skills|sort(attribute='proficiency', reverse=True) %}
+                        {% set cat = ss.skill.category %}
+                        <div class="col-12 col-sm-6">
+                            <div class="p-3 border rounded-3 bg-light h-100 {% if 'Frontend' in cat %}skill-cat-frontend{% elif 'Backend' in cat %}skill-cat-backend{% elif 'Data' in cat or 'AI' in cat %}skill-cat-data{% elif 'DevOps' in cat or 'Cloud' in cat %}skill-cat-devops{% else %}skill-cat-design{% endif %}">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <span class="fw-bold text-dark">{{ ss.skill.name }}</span>
+                                    <span class="skill-prof-pill">Level {{ ss.proficiency }}/5</span>
+                                </div>
+                                <div class="text-muted small mb-2">{{ ss.skill.category }}</div>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div class="progress flex-grow-1 me-2" style="height: 6px; border-radius: 9999px;">
+                                        <div class="progress-bar bg-primary" role="progressbar" style="width: {{ (ss.proficiency / 5.0) * 100 }}%;"></div>
+                                    </div>
+                                    <div class="prof-dots">
+                                        {% for i in range(1, 6) %}
+                                            <span class="prof-dot {% if i <= ss.proficiency %}active{% endif %}"></span>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% else %}
+                        <div class="col-12 text-muted py-3 text-center">No technical skills recorded.</div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Domain Interests -->
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-white fw-bold py-3">
+                <i class="bi bi-compass-fill text-primary me-2"></i>Preferred Project Domains & Interests
+            </div>
+            <div class="card-body p-4">
+                <div class="d-flex flex-wrap gap-2">
+                    {% for si in profile.interests %}
+                        <span class="badge bg-light text-dark border p-2 fs-6 rounded-3">
+                            <i class="bi bi-tag-fill me-1 text-primary"></i>{{ si.interest.name }}
+                        </span>
+                    {% else %}
+                        <span class="text-muted small">No domain interests selected.</span>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Previous Project Experience Portfolio -->
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-white fw-bold py-3">
+                <i class="bi bi-journal-richtext text-primary me-2"></i>Previous Project Experience Portfolio
+            </div>
+            <div class="card-body p-4">
+                {% if profile.previous_projects_summary %}
+                    <div class="p-3 bg-light rounded-3 border-start border-4 border-primary">
+                        <p class="mb-0 text-secondary" style="line-height: 1.6;">{{ profile.previous_projects_summary }}</p>
+                    </div>
+                {% else %}
+                    <p class="mb-0 text-muted small fst-italic">No previous project summary submitted.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

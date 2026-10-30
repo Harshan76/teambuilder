@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}Server Error - 500{% endblock %}
+{% block content %}
+<div class="container text-center py-5">
+    <div class="display-1 text-danger fw-bold">500</div>
+    <h2 class="h4 mb-3">Internal Server Error</h2>
+    <p class="text-secondary mb-4">An unexpected error occurred during operation. Please review input constraints or logs.</p>
+    <a href="{{ url_for('index') }}" class="btn btn-outline-secondary"><i class="bi bi-house me-1"></i>Home</a>
+</div>
+{% endblock %}

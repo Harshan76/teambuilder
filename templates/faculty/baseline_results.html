@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+{% block title %}Rule-Based Baseline Results - {{ project.title }}{% endblock %}
+
+{% block content %}
+<div class="row g-4 py-2">
+    <!-- Header -->
+    <div class="col-12">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+            <div>
+                <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
+                    <h1 class="h3 fw-bold mb-0">Rule-Based Baseline Results</h1>
+                    <span class="badge-baseline">Deterministic Heuristics</span>
+                </div>
+                <p class="text-secondary mb-0">Project: <strong>{{ project.title }}</strong> &bull; Generated in <code>{{ run.runtime_seconds|round(4) }}s</code> &bull; Run #{{ run.id }}</p>
+            </div>
+            <div class="d-flex flex-wrap gap-2">
+                <a href="{{ url_for('comparison.compare_project_runs', project_id=project.id) }}" class="btn btn-purple text-white">
+                    <i class="bi bi-bar-chart-fill me-1"></i>Compare with AI/ML Approach
+                </a>
+                <a href="{{ url_for('generation.review_and_edit_teams', run_id=run.id) }}" class="btn btn-outline-primary">
+                    <i class="bi bi-check-circle me-1"></i>Review & Finalize
+                </a>
+                <a href="{{ url_for('generation.project_generation_setup', project_id=project.id) }}" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-repeat me-1"></i>Regenerate
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Summary Metrics Cards -->
+    <div class="col-12">
+        <div class="row g-3">
+            <div class="col-6 col-md-3">
+                <div class="stat-card stat-card-accent-primary">
+                    <div class="small text-muted text-uppercase fw-semibold">Teams Formed</div>
+                    <div class="stat-card-number text-primary">{{ run.n_teams }}</div>
+                    <div class="small text-muted">{{ project.desired_team_size }} students / team</div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="stat-card stat-card-accent-green">
+                    <div class="small text-muted text-uppercase fw-semibold">Students Assigned</div>
+                    <div class="stat-card-number text-success">{{ run.n_students_assigned }}</div>
+                    <div class="small text-muted">100% of eligible cohort</div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="stat-card stat-card-accent-blue">
+                    <div class="small text-muted text-uppercase fw-semibold">Skill Coverage</div>
+                    <div class="stat-card-number text-info">{{ (evaluation.skill_coverage_ratio * 100)|round(1) }}%</div>
+                    <div class="small text-muted">Required project skills met</div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="stat-card">
+                    <div class="small text-muted text-uppercase fw-semibold">Size Compliance</div>
+                    <div class="stat-card-number text-dark">{{ (evaluation.team_size_compliance * 100)|round(1) }}%</div>
+                    <div class="small text-muted">Constraint satisfaction</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Generated Teams Grid -->
+    <div class="col-12">
+        <div class="row g-4">
+            {% for t in teams %}
+                <div class="col-12 col-lg-6">
+                    <div class="card shadow-sm h-100 team-card border-0">
+                        <div class="card-header bg-white d-flex justify-content-between align-items-center py-3">
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="stat-icon-wrapper" style="width: 32px; height: 32px; background: #e0f2fe; color: #0284c7; border-radius: 0.5rem; font-size: 0.9rem;">
+                                    <i class="bi bi-people-fill"></i>
+                                </span>
+                                <h5 class="fw-bold mb-0 text-dark">{{ t.name }}</h5>
+                            </div>
+                            <span class="badge bg-light text-dark border">{{ t.members|length }} Members</span>
+                        </div>
+                        <div class="card-body p-0">
+                            {% for m in t.members %}
+                                <div class="team-member-row d-flex justify-content-between align-items-center">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <div class="avatar-initials" style="width: 36px; height: 36px; font-size: 0.8rem;">
+                                            {{ m.profile.user.full_name[:2]|upper }}
+                                        </div>
+                                        <div>
+                                            <div class="fw-bold text-dark">{{ m.profile.user.full_name }}</div>
+                                            <div class="text-muted small">
+                                                <span class="badge bg-light text-secondary border me-1">{{ m.profile.student_id }}</span>
+                                                {{ m.profile.department }} &bull; {{ m.profile.experience_level }}
+                                            </div>
+                                            <div class="mt-1">
+                                                {% set rname = m.assigned_role.name if m.assigned_role else 'Member' %}
+                                                {% if 'Backend' in rname %}
+                                                    <span class="role-badge role-badge-backend" style="font-size: 0.72rem;">{{ rname }}</span>
+                                                {% elif 'Frontend' in rname %}
+                                                    <span class="role-badge role-badge-frontend" style="font-size: 0.72rem;">{{ rname }}</span>
+                                                {% elif 'ML' in rname or 'Data' in rname %}
+                                                    <span class="role-badge role-badge-data" style="font-size: 0.72rem;">{{ rname }}</span>
+                                                {% elif 'DevOps' in rname or 'QA' in rname %}
+                                                    <span class="role-badge role-badge-qa" style="font-size: 0.72rem;">{{ rname }}</span>
+                                                {% elif 'Design' in rname or 'UI' in rname %}
+                                                    <span class="role-badge role-badge-designer" style="font-size: 0.72rem;">{{ rname }}</span>
+                                                {% else %}
+                                                    <span class="role-badge role-badge-coordinator" style="font-size: 0.72rem;">{{ rname }}</span>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="text-end">
+                                        <span class="badge bg-primary bg-opacity-10 text-primary border border-primary-subtle fs-6 px-2 py-1 fw-bold">
+                                            {{ m.matching_score|round(1) }}/100
+                                        </span>
+                                        <div class="text-muted small" style="font-size: 0.68rem;">Baseline Fit Score</div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

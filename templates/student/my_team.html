@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+{% block title %}My Team - {{ team.name }}{% endblock %}
+
+{% block content %}
+<div class="row g-4 py-2">
+    <!-- Header -->
+    <div class="col-12">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+            <div>
+                <div class="d-flex align-items-center gap-2 mb-1">
+                    <h1 class="h3 fw-bold mb-0 text-dark">{{ team.name }}</h1>
+                    <span class="badge bg-success fw-bold px-3 py-2"><i class="bi bi-shield-check me-1"></i>Approved &amp; Finalized</span>
+                    <span class="{% if team.generation_method == 'baseline' %}badge-baseline{% else %}badge-ml{% endif %}">
+                        Formed via {{ team.generation_method|upper }}
+                    </span>
+                </div>
+                <p class="text-secondary mb-0">Project: <strong>{{ project.title }}</strong> &bull; Domain: <span class="domain-pill domain-health small">{{ project.domain }}</span></p>
+            </div>
+            <a href="{{ url_for('student.dashboard') }}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-1"></i>My Portal
+            </a>
+        </div>
+    </div>
+
+    <!-- My Personal Assignment & Explanation Card -->
+    <div class="col-12">
+        <div class="card shadow-sm border-0" style="border-left: 5px solid #4f46e5 !important; background: linear-gradient(135deg, rgba(79, 70, 229, 0.04) 0%, rgba(124, 58, 237, 0.04) 100%);">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center py-3">
+                <span class="fw-bold text-primary"><i class="bi bi-lightbulb-fill me-2 text-warning"></i>My Role Recommendation &amp; Team Assignment Explanation</span>
+                <span class="score-badge">Fit Score: {{ membership.matching_score|round(1) }}/100</span>
+            </div>
+            <div class="card-body p-4">
+                <div class="row g-4 align-items-center">
+                    <div class="col-12 col-md-4 border-end">
+                        <div class="small text-muted text-uppercase fw-bold mb-1">Your Assigned Responsibility</div>
+                        <h4 class="fw-bold text-success mb-2">
+                            <i class="bi bi-person-badge-fill me-2"></i>
+                            {{ membership.assigned_role.name if membership.assigned_role else 'Core Specialist' }}
+                        </h4>
+                        {% if membership.cluster_label %}
+                            <div class="small text-muted mt-2">
+                                Learned Archetype: <span class="cluster-badge mt-1">{{ membership.cluster_label }}</span>
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="col-12 col-md-8">
+                        <div class="small text-muted text-uppercase fw-bold mb-1">Algorithmic Rationale:</div>
+                        <p class="mb-0 text-dark fs-6" style="line-height: 1.6;">
+                            {% if membership.role_assignment and membership.role_assignment.rationale %}
+                                {{ membership.role_assignment.rationale }}
+                            {% else %}
+                                Assigned based on complementary skill contribution, verified schedule overlap, and matching with project technical requirements.
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Teammates Directory -->
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h4 class="fw-bold mb-0 text-dark"><i class="bi bi-people-fill text-primary me-2"></i>Team Members ({{ teammates|length }})</h4>
+            <span class="text-muted small">Collaborative Roster</span>
+        </div>
+        <div class="row g-4">
+            {% for m in teammates %}
+                <div class="col-12 col-md-6 col-xl-3">
+                    <div class="card shadow-sm h-100 {% if m.id == membership.id %}border-primary{% endif %}" style="{% if m.id == membership.id %}box-shadow: 0 0 0 2px #6366f1, 0 10px 25px -5px rgba(99, 102, 241, 0.15) !important;{% endif %}">
+                        <div class="card-body p-4 d-flex flex-column justify-content-between">
+                            <div>
+                                <div class="d-flex justify-content-between align-items-start mb-3">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <div class="avatar-initials">
+                                            {{ m.profile.user.full_name[:2]|upper }}
+                                        </div>
+                                        <div>
+                                            <h6 class="fw-bold mb-0 text-dark">
+                                                {{ m.profile.user.full_name }}
+                                                {% if m.id == membership.id %}<span class="badge bg-primary ms-1" style="font-size: 0.65rem;">You</span>{% endif %}
+                                            </h6>
+                                            <span class="text-muted small" style="font-size: 0.75rem;">{{ m.profile.student_id }}</span>
+                                        </div>
+                                    </div>
+                                    <span class="badge bg-secondary small">{{ m.profile.experience_level }}</span>
+                                </div>
+
+                                <div class="mb-2">
+                                    <span class="small text-muted d-block fw-bold" style="font-size: 0.72rem;">Assigned Role:</span>
+                                    <span class="role-badge mt-1">
+                                        <i class="bi bi-person-fill"></i>{{ m.assigned_role.name if m.assigned_role else 'Team Member' }}
+                                    </span>
+                                </div>
+
+                                {% if m.cluster_label %}
+                                    <div class="mb-3">
+                                        <span class="small text-muted d-block fw-bold" style="font-size: 0.72rem;">Cluster Archetype:</span>
+                                        <span class="cluster-badge small mt-1" style="font-size: 0.72rem;">
+                                            {{ m.cluster_label }}
+                                        </span>
+                                    </div>
+                                {% endif %}
+
+                                <div class="mb-3">
+                                    <span class="small text-muted d-block fw-bold mb-1" style="font-size: 0.72rem;">Core Proficiencies:</span>
+                                    <div class="d-flex flex-wrap gap-1">
+                                        {% for ss in m.profile.skills[:4] %}
+                                            <span class="skill-badge {% if ss.skill.category == 'Frontend' %}skill-cat-frontend{% elif ss.skill.category == 'Backend' %}skill-cat-backend{% elif ss.skill.category == 'Data/AI' %}skill-cat-data{% else %}skill-cat-devops{% endif %}" style="font-size: 0.72rem;">
+                                                {{ ss.skill.name }}
+                                                <span class="skill-prof-pill">L{{ ss.proficiency }}</span>
+                                            </span>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="pt-2 border-top">
+                                <span class="small text-muted d-block fw-bold mb-1" style="font-size: 0.7rem;">Meeting Availability:</span>
+                                <div class="d-flex flex-wrap gap-1">
+                                    {% for sa in m.profile.availability %}
+                                        <span class="badge bg-light text-secondary border" style="font-size: 0.68rem;">
+                                            <i class="bi bi-clock me-1"></i>{{ sa.slot.slot_name }}
+                                        </span>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

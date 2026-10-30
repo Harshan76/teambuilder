@@ -1,0 +1,280 @@
+{% extends "base.html" %}
+{% block title %}Student Portal - AI Group Project Team Builder{% endblock %}
+
+{% block content %}
+<div class="row g-4 py-2">
+    <!-- Top Welcome Banner with Avatar & Academic Badge -->
+    <div class="col-12">
+        <div class="card border-0 shadow-sm p-4 text-white" style="background: var(--brand-gradient); border-radius: 1.2rem;">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="avatar-initials avatar-initials-lg bg-white text-dark shadow-sm" style="background: #ffffff !important; color: #4f46e5 !important; font-size: 1.3rem;">
+                        {{ current_user.full_name[:2]|upper }}
+                    </div>
+                    <div>
+                        <div class="d-flex align-items-center gap-2 mb-1">
+                            <h2 class="h4 fw-bold mb-0 text-white">{{ current_user.full_name }}</h2>
+                            <span class="badge bg-white bg-opacity-25 text-white small" style="backdrop-filter: blur(4px);">
+                                {{ profile.student_id if profile else 'STU-NEW' }}
+                            </span>
+                        </div>
+                        <p class="mb-0 text-white text-opacity-90 small">
+                            <i class="bi bi-mortarboard-fill me-1"></i>Department of {{ profile.department if profile else 'Engineering' }}
+                            &bull; Experience: <span class="badge bg-black bg-opacity-25">{{ profile.experience_level if profile else 'Beginner' }}</span>
+                            ({{ profile.experience_years if profile else 0.0 }} yrs)
+                        </p>
+                    </div>
+                </div>
+                <div class="d-flex gap-2">
+                    <a href="{{ url_for('student.profile_edit') }}" class="btn btn-light fw-bold shadow-sm" style="color: #4f46e5;">
+                        <i class="bi bi-pencil-square me-1"></i>Update Skill Profile
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Profile Completeness Diagnostic Banner -->
+    <div class="col-12">
+        <div class="card border-0 shadow-sm {% if is_complete %}bg-success bg-opacity-10 border-success{% else %}bg-warning bg-opacity-10 border-warning{% endif %}" style="border-left: 5px solid {% if is_complete %}#10b981{% else %}#f59e0b{% endif %} !important;">
+            <div class="card-body p-4">
+                <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-3">
+                    <div>
+                        <h5 class="fw-bold mb-1 d-flex align-items-center gap-2">
+                            {% if is_complete %}
+                                <i class="bi bi-patch-check-fill text-success fs-4"></i>
+                                <span class="text-success">Profile Verified &amp; Eligible for Team Matching</span>
+                            {% else %}
+                                <i class="bi bi-exclamation-triangle-fill text-warning fs-4"></i>
+                                <span class="text-dark">Profile Setup Incomplete ({{ completion_pct }}% Ready)</span>
+                            {% endif %}
+                        </h5>
+                        <p class="mb-0 text-secondary small">
+                            {% if is_complete %}
+                                Your technical proficiencies, domain interests, schedule slots, and preferred roles are fully configured. Both the <strong>Rule-Based Baseline</strong> and <strong>AI/ML K-Means</strong> matching engines will include you in project cohorts.
+                            {% else %}
+                                Please finish all required profile dimensions so the algorithms can allocate you to a balanced project team with complementary roles.
+                            {% endif %}
+                        </p>
+                    </div>
+                    <div>
+                        <span class="badge {% if is_complete %}bg-success text-white{% else %}bg-warning text-dark{% endif %} fs-6 px-3 py-2 fw-bold">
+                            {{ completion_pct }}% Complete
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Progress Bar -->
+                <div class="progress mb-2" style="height: 10px; border-radius: 9999px;">
+                    <div class="progress-bar {% if is_complete %}bg-success{% else %}bg-warning{% endif %} progress-bar-striped progress-bar-animated" role="progressbar" style="width: {{ completion_pct }}%;"></div>
+                </div>
+
+                {% if not is_complete and missing_reqs %}
+                    <div class="mt-2 text-danger small">
+                        <strong>Action Required:</strong>
+                        <ul class="mb-0 ps-3 mt-1">
+                            {% for item in missing_reqs %}
+                                <li>{{ item }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Active Finalized Teams (If Any) -->
+    {% if assigned_memberships %}
+        <div class="col-12">
+            <div class="card shadow-sm border-0" style="border-top: 4px solid #10b981 !important;">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <span class="fw-bold text-dark"><i class="bi bi-trophy-fill me-2 text-warning"></i>My Finalized Team Assignment</span>
+                    <span class="badge bg-success">Published by Faculty</span>
+                </div>
+                <div class="card-body p-4">
+                    <div class="row g-3">
+                        {% for mem in assigned_memberships %}
+                            <div class="col-12">
+                                <div class="p-3 border rounded-3 bg-light d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+                                    <div>
+                                        <div class="d-flex align-items-center gap-2 mb-1">
+                                            <h4 class="fw-bold mb-0 text-dark">{{ mem.team.name }}</h4>
+                                            <span class="badge-baseline">Formed via {{ mem.team.generation_method|upper }}</span>
+                                        </div>
+                                        <p class="text-secondary small mb-2">Project: <strong>{{ mem.team.project.title }}</strong> &bull; Domain: <span class="domain-pill domain-health small">{{ mem.team.project.domain }}</span></p>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <span class="text-muted small">Your Role:</span>
+                                            <span class="role-badge role-badge-backend">
+                                                <i class="bi bi-person-badge-fill me-1"></i>{{ mem.assigned_role.name if mem.assigned_role else 'Core Specialist' }}
+                                            </span>
+                                            {% if mem.cluster_label %}
+                                                <span class="cluster-badge small">{{ mem.cluster_label }}</span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <a href="{{ url_for('student.my_team', project_id=mem.team.project_id) }}" class="btn btn-primary fw-semibold">
+                                            <i class="bi bi-diagram-3 me-1"></i>View Team &amp; Explanations <i class="bi bi-arrow-right ms-1"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
+    <!-- Left Column: Student Dossier Profile Summary -->
+    <div class="col-12 col-lg-5">
+        <div class="card shadow-sm h-100">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                <span class="fw-bold text-dark"><i class="bi bi-person-lines-fill me-2 text-primary"></i>My Skill Dossier</span>
+                <a href="{{ url_for('student.profile_edit') }}" class="btn btn-sm btn-outline-primary py-0">Edit</a>
+            </div>
+            <div class="card-body p-4">
+                {% if profile %}
+                    <!-- Academic Department & Experience -->
+                    <div class="mb-3 pb-3 border-bottom">
+                        <label class="text-muted small text-uppercase fw-bold d-block mb-1">Academic Track</label>
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="fw-semibold">{{ profile.department }}</span>
+                            <span class="badge bg-secondary">{{ profile.experience_level }}</span>
+                            <span class="text-muted small">({{ profile.experience_years }} yrs experience)</span>
+                        </div>
+                    </div>
+
+                    <!-- Verified Technical Skills -->
+                    <div class="mb-3 pb-3 border-bottom">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <label class="text-muted small text-uppercase fw-bold mb-0">Technical Skills &amp; Proficiencies</label>
+                            <span class="badge bg-primary bg-opacity-10 text-primary small">{{ profile.skills|length }} Verified</span>
+                        </div>
+                        <div class="d-flex flex-wrap gap-1">
+                            {% for ss in profile.skills|sort(attribute='proficiency', reverse=True) %}
+                                <div class="skill-badge {% if ss.skill.category == 'Frontend' %}skill-cat-frontend{% elif ss.skill.category == 'Backend' %}skill-cat-backend{% elif ss.skill.category == 'Data/AI' %}skill-cat-data{% elif ss.skill.category == 'DevOps' %}skill-cat-devops{% else %}skill-cat-design{% endif %}">
+                                    <span>{{ ss.skill.name }}</span>
+                                    <span class="skill-prof-pill">L{{ ss.proficiency }}</span>
+                                    <span class="prof-dots">
+                                        {% for i in range(1, 6) %}
+                                            <span class="prof-dot {% if i <= ss.proficiency %}active{% endif %}"></span>
+                                        {% endfor %}
+                                    </span>
+                                </div>
+                            {% else %}
+                                <span class="text-muted small fst-italic">No technical skills added yet.</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <!-- Domain Interests -->
+                    <div class="mb-3 pb-3 border-bottom">
+                        <label class="text-muted small text-uppercase fw-bold d-block mb-2">Domain Interests</label>
+                        <div class="d-flex flex-wrap gap-1">
+                            {% for si in profile.interests %}
+                                <span class="badge bg-light text-dark border p-2 small">
+                                    <i class="bi bi-tag-fill text-primary me-1"></i>{{ si.interest.name }}
+                                </span>
+                            {% else %}
+                                <span class="text-muted small fst-italic">No domain interests selected.</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <!-- Preferred Roles (Ranked) -->
+                    <div class="mb-3 pb-3 border-bottom">
+                        <label class="text-muted small text-uppercase fw-bold d-block mb-2">Preferred Team Roles (Ranked)</label>
+                        <div class="d-flex flex-column gap-2">
+                            {% for spr in profile.preferred_roles|sort(attribute='preference_rank') %}
+                                <div class="d-flex justify-content-between align-items-center p-2 rounded bg-light border">
+                                    <span class="small fw-bold text-primary">#{{ spr.preference_rank }} Choice</span>
+                                    <span class="role-badge">{{ spr.role.name }}</span>
+                                </div>
+                            {% else %}
+                                <span class="text-muted small fst-italic">No role preferences recorded.</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <!-- Weekly Availability -->
+                    <div>
+                        <label class="text-muted small text-uppercase fw-bold d-block mb-2">Weekly Availability Windows</label>
+                        <div class="d-flex flex-wrap gap-1">
+                            {% for sa in profile.availability %}
+                                <span class="badge bg-light text-secondary border p-2 small">
+                                    <i class="bi bi-clock-fill text-info me-1"></i>{{ sa.slot.slot_name }}
+                                </span>
+                            {% else %}
+                                <span class="text-muted small fst-italic">No availability windows chosen.</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Column: Real-World Academic Projects -->
+    <div class="col-12 col-lg-7">
+        <div class="card shadow-sm h-100">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                <span class="fw-bold text-dark"><i class="bi bi-kanban me-2 text-warning"></i>Active Academic Projects</span>
+                <span class="badge bg-primary">{{ projects|length }} Open Projects</span>
+            </div>
+            <div class="card-body p-0">
+                <div class="list-group list-group-flush">
+                    {% for p in projects %}
+                        <div class="list-group-item p-4">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <h5 class="fw-bold mb-0 text-dark">{{ p.title }}</h5>
+                                <span class="domain-pill {% if 'Health' in p.domain %}domain-health{% elif 'Fin' in p.domain %}domain-fintech{% elif 'IoT' in p.domain %}domain-iot{% elif 'Cyber' in p.domain %}domain-cyber{% else %}domain-web{% endif %}">
+                                    {{ p.domain }}
+                                </span>
+                            </div>
+                            <p class="text-secondary small mb-3">{{ p.description }}</p>
+
+                            <!-- Project Metrics Row -->
+                            <div class="p-2 bg-light rounded-3 d-flex flex-wrap align-items-center gap-3 mb-3 text-secondary small">
+                                <div><i class="bi bi-people-fill text-primary me-1"></i>Team Size: <strong>{{ p.desired_team_size }}</strong> ({{ p.min_team_size }}-{{ p.max_team_size }})</div>
+                                <div><i class="bi bi-award-fill text-warning me-1"></i>Target Exp: <strong>{{ p.experience_level_required }}</strong></div>
+                                <div><i class="bi bi-shield-check text-success me-1"></i>Status: <span class="badge bg-success">{{ p.status }}</span></div>
+                            </div>
+
+                            <!-- Required Skills Breakdown -->
+                            <div class="mb-2">
+                                <div class="text-muted small text-uppercase fw-bold mb-1">Required Competencies:</div>
+                                <div class="d-flex flex-wrap gap-1">
+                                    {% for rs in p.required_skills %}
+                                        <span class="req-pill {% if rs.is_mandatory %}req-pill-mand{% endif %}">
+                                            <strong>{{ rs.skill.name }}</strong>
+                                            <span class="badge bg-primary">&ge; Lvl {{ rs.min_proficiency }}</span>
+                                            {% if rs.is_mandatory %}
+                                                <span class="badge bg-danger text-white small" style="font-size: 0.65rem;">Mandatory</span>
+                                            {% endif %}
+                                        </span>
+                                    {% endfor %}
+                                </div>
+                            </div>
+
+                            <!-- Required Roles Breakdown -->
+                            <div class="mt-2">
+                                <div class="text-muted small text-uppercase fw-bold mb-1">Required Team Roles:</div>
+                                <div class="d-flex flex-wrap gap-1">
+                                    {% for rr in p.required_roles %}
+                                        <span class="role-badge">
+                                            {{ rr.role.name }} <span class="badge bg-secondary ms-1">&times;{{ rr.count_needed }}</span>
+                                        </span>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5 text-muted">No academic projects available currently.</div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

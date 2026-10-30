@@ -1,0 +1,184 @@
+{% extends "base.html" %}
+{% block title %}ML Model Status & Data Readiness - Team Builder{% endblock %}
+
+{% block content %}
+<div class="row g-4 py-2">
+    <!-- Header -->
+    <div class="col-12">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+            <div>
+                <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
+                    <h1 class="h3 fw-bold mb-0">ML Model Status &amp; Data Readiness</h1>
+                    <span class="badge-ml">Scikit-Learn K-Means Pipeline</span>
+                </div>
+                <p class="text-secondary mb-0">Inspect feature representations, cluster centroids, silhouette validation metrics, and cohort sample readiness.</p>
+            </div>
+            <a href="{{ url_for('faculty.dashboard') }}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-1"></i>Dashboard
+            </a>
+        </div>
+    </div>
+
+    <!-- Data Readiness Banner -->
+    <div class="col-12">
+        <div class="card shadow-sm border-0 p-4" style="background: {% if is_ready %}linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%){% else %}linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%){% endif %}; border-left: 5px solid {% if is_ready %}#10b981{% else %}#f59e0b{% endif %} !important;">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="stat-icon-wrapper" style="width: 48px; height: 48px; background: {% if is_ready %}#10b981{% else %}#f59e0b{% endif %}; color: #ffffff; border-radius: 0.8rem; font-size: 1.5rem;">
+                        {% if is_ready %}
+                            <i class="bi bi-check-lg"></i>
+                        {% else %}
+                            <i class="bi bi-exclamation-lg"></i>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <h5 class="fw-bold text-dark mb-1">
+                            {% if is_ready %}
+                                Cohort Dataset Ready for Machine Learning Clustering
+                            {% else %}
+                                Sample Size Limitation Warning
+                            {% endif %}
+                        </h5>
+                        <p class="text-secondary small mb-0" style="line-height: 1.5;">
+                            Current cohort: <strong>{{ complete_profiles }}</strong> verified complete profiles out of <strong>{{ total_students }}</strong> registered students.
+                            Minimum 4 complete profiles are required for statistical multi-cluster partitioning without degenerate results.
+                        </p>
+                    </div>
+                </div>
+                <div>
+                    <span class="badge {% if is_ready %}bg-success{% else %}bg-warning text-dark{% endif %} fs-6 px-3 py-2 fw-bold">
+                        {{ complete_profiles }} Eligible Profiles
+                    </span>
+                </div>
+            </div>
+            {% if warning %}
+                <div class="alert alert-warning py-2 px-3 small mt-3 mb-0 border-0 bg-white shadow-sm">
+                    <i class="bi bi-exclamation-triangle-fill text-warning me-1"></i>{{ warning }}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Active Model Diagnostics -->
+    <div class="col-12 col-lg-5">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-header bg-white fw-bold py-3">
+                <i class="bi bi-cpu-fill text-primary me-2"></i>Active Scikit-Learn Model Metadata
+            </div>
+            <div class="card-body p-4">
+                {% if latest_run %}
+                    <div class="mb-3 pb-3 border-bottom">
+                        <div class="text-muted small text-uppercase fw-semibold">Algorithm</div>
+                        <div class="fw-bold text-dark fs-6">{{ latest_run.algorithm }}</div>
+                    </div>
+                    <div class="mb-3 pb-3 border-bottom">
+                        <div class="text-muted small text-uppercase fw-semibold">Cluster Count (K)</div>
+                        <div class="fw-bold fs-5 text-primary">{{ latest_run.n_clusters }} Learned Clusters</div>
+                    </div>
+                    <div class="mb-3 pb-3 border-bottom">
+                        <div class="text-muted small text-uppercase fw-semibold">Silhouette Coefficient</div>
+                        <div class="fw-bold fs-4" style="color: #7c3aed;">
+                            {{ latest_run.silhouette_score|round(4) if latest_run.silhouette_score is not none else 'N/A' }}
+                        </div>
+                        <div class="text-muted small">Measures cluster cohesion vs. separation [-1.0 to +1.0]</div>
+                    </div>
+                    <div class="mb-3 pb-3 border-bottom">
+                        <div class="text-muted small text-uppercase fw-semibold">Inertia (Sum of Squared Distances)</div>
+                        <div class="fw-bold text-dark">{{ latest_run.inertia|round(2) if latest_run.inertia is not none else 'N/A' }}</div>
+                    </div>
+                    <div class="mb-3 pb-3 border-bottom">
+                        <div class="text-muted small text-uppercase fw-semibold">Training Sample Size</div>
+                        <div class="fw-bold text-dark">{{ latest_run.n_samples }} Student Profiles</div>
+                    </div>
+                    <div>
+                        <div class="text-muted small text-uppercase fw-semibold">Fitted Timestamp</div>
+                        <div class="text-secondary small">{{ latest_run.trained_at.strftime('%Y-%m-%d %H:%M:%S UTC') }}</div>
+                    </div>
+                {% else %}
+                    <div class="text-center py-5 text-muted">
+                        <i class="bi bi-cpu fs-1 d-block mb-2 text-secondary"></i>
+                        No model runs recorded yet. Generate teams using the AI/ML option to fit and persist the initial K-Means model.
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Discovered Cluster Archetypes -->
+    <div class="col-12 col-lg-7">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center py-3">
+                <span class="fw-bold fs-6">
+                    <i class="bi bi-diagram-3-fill text-primary me-2"></i>Discovered Student Archetypes
+                </span>
+                <span class="badge-ml">{{ cluster_summaries|length }} Discovered Clusters</span>
+            </div>
+            <div class="card-body p-4">
+                {% if cluster_summaries %}
+                    <div class="row g-3">
+                        {% for c_id, summ in cluster_summaries.items() %}
+                            <div class="col-12">
+                                <div class="p-3 border rounded-3 bg-light">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <h6 class="fw-bold text-dark mb-0">
+                                            <span class="cluster-badge me-2">Cluster {{ c_id }}</span>
+                                            {{ summ.title }}
+                                        </h6>
+                                        <span class="badge bg-secondary">{{ summ.size }} Students</span>
+                                    </div>
+
+                                    <div class="mb-2">
+                                        <span class="small text-muted d-block mb-1 fw-semibold">Centroid Peak Distinguishing Skills:</span>
+                                        <div class="d-flex flex-wrap gap-1">
+                                            {% for sk in summ.top_skills %}
+                                                <span class="badge bg-white text-dark border small">{{ sk }}</span>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+
+                                    <div class="d-flex flex-wrap gap-3 small text-secondary pt-2 border-top">
+                                        <div><strong>Dominant Role:</strong> {{ summ.dominant_role }}</div>
+                                        <div><strong>Top Interests:</strong> {{ summ.top_interests|join(', ') }}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center py-5 text-muted">
+                        <i class="bi bi-pie-chart fs-1 d-block mb-2 text-secondary"></i>
+                        Run an AI/ML generation to inspect cluster centroid archetypes.
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Evaluator Defense & Limitation Disclosure -->
+    <div class="col-12">
+        <div class="card shadow-sm border-0 bg-light p-4">
+            <h5 class="fw-bold text-dark mb-2"><i class="bi bi-shield-check text-primary me-2"></i>Data &amp; Machine Learning Architecture Defense</h5>
+            <div class="row g-3 small text-secondary">
+                <div class="col-12 col-md-4">
+                    <div class="p-3 bg-white border rounded-3 h-100 shadow-sm">
+                        <strong class="text-dark d-block mb-1">1. Why K-Means?</strong>
+                        When historical group project success labels do not exist, unsupervised K-Means discovers genuine latent archetypes from multi-dimensional feature vectors without fabricating subjective target labels.
+                    </div>
+                </div>
+                <div class="col-12 col-md-4">
+                    <div class="p-3 bg-white border rounded-3 h-100 shadow-sm">
+                        <strong class="text-dark d-block mb-1">2. How are Teams Formed?</strong>
+                        The clustering model exposes profile archetypes; the recommendation procedure consumes these archetypes to enforce cross-cluster diversity and complementary skill set coverage across teams.
+                    </div>
+                </div>
+                <div class="col-12 col-md-4">
+                    <div class="p-3 bg-white border rounded-3 h-100 shadow-sm">
+                        <strong class="text-dark d-block mb-1">3. Future Supervised Extension</strong>
+                        If a university repository of previous team compositions and project grade outcomes becomes available, supervised models (e.g. Random Forest, GBDT) can be directly plugged in to predict real-world team performance.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

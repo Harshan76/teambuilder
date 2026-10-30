@@ -1,0 +1,197 @@
+{% extends "base.html" %}
+{% block title %}Student Cohort Directory - AI Group Project Team Builder{% endblock %}
+
+{% block content %}
+<div class="row g-4 py-2">
+    <!-- Header -->
+    <div class="col-12">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+            <div>
+                <div class="d-flex align-items-center gap-2 mb-1">
+                    <h1 class="h3 fw-bold mb-0">Student Profiles Directory</h1>
+                    <span class="badge bg-primary bg-opacity-10 text-primary border border-primary-subtle px-2 py-1">
+                        {{ students|length }} Students
+                    </span>
+                </div>
+                <p class="text-secondary mb-0">Inspect student technical proficiencies, domain interests, and formation eligibility.</p>
+            </div>
+            <div class="d-flex gap-2">
+                <a href="{{ url_for('faculty.dashboard') }}" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left me-1"></i>Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters Bar -->
+    <div class="col-12">
+        <div class="card shadow-sm border-0" style="background: #ffffff;">
+            <div class="card-body p-3">
+                <form method="GET" action="{{ url_for('faculty.students_list') }}" class="row g-3 align-items-end">
+                    <div class="col-12 col-md-4">
+                        <label class="form-label small fw-semibold text-muted mb-1">Search Student Cohort</label>
+                        <div class="input-group input-group-sm">
+                            <span class="input-group-text bg-light border-end-0"><i class="bi bi-search text-muted"></i></span>
+                            <input type="text" class="form-control border-start-0" name="q" value="{{ current_query }}" placeholder="Search by name, student ID, email...">
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-3">
+                        <label class="form-label small fw-semibold text-muted mb-1">Department</label>
+                        <select class="form-select form-select-sm" name="department">
+                            <option value="">All Departments</option>
+                            {% for dept in departments %}
+                                <option value="{{ dept }}" {% if current_dept == dept %}selected{% endif %}>{{ dept }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-12 col-md-2">
+                        <label class="form-label small fw-semibold text-muted mb-1">Experience Level</label>
+                        <select class="form-select form-select-sm" name="experience">
+                            <option value="">All Levels</option>
+                            <option value="Beginner" {% if current_exp == 'Beginner' %}selected{% endif %}>Beginner</option>
+                            <option value="Intermediate" {% if current_exp == 'Intermediate' %}selected{% endif %}>Intermediate</option>
+                            <option value="Advanced" {% if current_exp == 'Advanced' %}selected{% endif %}>Advanced</option>
+                        </select>
+                    </div>
+                    <div class="col-12 col-md-2">
+                        <div class="form-check pt-2">
+                            <input class="form-check-input" type="checkbox" name="complete_only" value="1" id="completeOnlyCheck" {% if complete_only %}checked{% endif %}>
+                            <label class="form-check-label small fw-semibold" for="completeOnlyCheck">
+                                Complete Only
+                            </label>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-1 d-grid">
+                        <button type="submit" class="btn btn-sm btn-primary">
+                            <i class="bi bi-funnel me-1"></i>Filter
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Students Table -->
+    <div class="col-12">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center py-3">
+                <span class="fw-bold fs-6">
+                    <i class="bi bi-people-fill text-primary me-2"></i>Registered Students ({{ students|length }})
+                </span>
+                <span class="small text-muted">Click student row or details to view complete skill profile</span>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr class="small text-muted text-uppercase" style="letter-spacing: 0.04em;">
+                            <th class="ps-3">Student Profile</th>
+                            <th>Department</th>
+                            <th>Experience</th>
+                            <th>Top Technical Skills</th>
+                            <th>Preferred Role</th>
+                            <th>Profile Status</th>
+                            <th class="text-end pe-3">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for s in students %}
+                            <tr>
+                                <td class="ps-3 py-3">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <div class="avatar-initials">
+                                            {{ s.user.full_name[:2]|upper }}
+                                        </div>
+                                        <div>
+                                            <div class="fw-bold text-dark">{{ s.user.full_name }}</div>
+                                            <div class="text-muted small">
+                                                <span class="badge bg-light text-secondary border me-1">{{ s.student_id }}</span>
+                                                {{ s.user.email }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="badge bg-light text-dark border">{{ s.department }}</span>
+                                </td>
+                                <td>
+                                    {% if s.experience_level == 'Advanced' %}
+                                        <span class="badge bg-success bg-opacity-10 text-success border border-success-subtle fw-bold">
+                                            <i class="bi bi-stars me-1"></i>Advanced
+                                        </span>
+                                    {% elif s.experience_level == 'Intermediate' %}
+                                        <span class="badge bg-primary bg-opacity-10 text-primary border border-primary-subtle fw-bold">
+                                            <i class="bi bi-check-circle me-1"></i>Intermediate
+                                        </span>
+                                    {% else %}
+                                        <span class="badge bg-purple bg-opacity-10 text-purple border border-purple-subtle fw-bold" style="color: #7c3aed; background: #faf5ff;">
+                                            <i class="bi bi-mortarboard me-1"></i>Beginner
+                                        </span>
+                                    {% endif %}
+                                    <div class="text-muted small mt-1">{{ s.experience_years }}y exp</div>
+                                </td>
+                                <td>
+                                    <div class="d-flex flex-wrap gap-1">
+                                        {% for ss in s.skills[:3] %}
+                                            <span class="skill-badge" style="font-size: 0.76rem;">
+                                                {{ ss.skill.name }}
+                                                <span class="skill-prof-pill">{{ ss.proficiency }}</span>
+                                            </span>
+                                        {% endfor %}
+                                        {% if s.skills|length > 3 %}
+                                            <span class="badge bg-light text-muted border" style="font-size: 0.72rem;">+{{ s.skills|length - 3 }}</span>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                                <td>
+                                    {% set top_role = s.preferred_roles|selectattr("preference_rank", "equalto", 1)|first %}
+                                    {% if top_role and top_role.role %}
+                                        {% set rname = top_role.role.name %}
+                                        {% if 'Backend' in rname %}
+                                            <span class="role-badge role-badge-backend"><i class="bi bi-server me-1"></i>{{ rname }}</span>
+                                        {% elif 'Frontend' in rname %}
+                                            <span class="role-badge role-badge-frontend"><i class="bi bi-window me-1"></i>{{ rname }}</span>
+                                        {% elif 'ML' in rname or 'Data' in rname %}
+                                            <span class="role-badge role-badge-data"><i class="bi bi-cpu me-1"></i>{{ rname }}</span>
+                                        {% elif 'DevOps' in rname or 'QA' in rname %}
+                                            <span class="role-badge role-badge-qa"><i class="bi bi-shield-check me-1"></i>{{ rname }}</span>
+                                        {% elif 'Design' in rname or 'UI' in rname %}
+                                            <span class="role-badge role-badge-designer"><i class="bi bi-palette me-1"></i>{{ rname }}</span>
+                                        {% else %}
+                                            <span class="role-badge role-badge-coordinator"><i class="bi bi-kanban me-1"></i>{{ rname }}</span>
+                                        {% endif %}
+                                    {% else %}
+                                        <span class="text-muted small">Not specified</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if s.is_profile_complete %}
+                                        <span class="badge bg-success bg-opacity-10 text-success border border-success-subtle px-2 py-1 fw-semibold">
+                                            <i class="bi bi-check-circle-fill me-1"></i>Complete
+                                        </span>
+                                    {% else %}
+                                        <span class="badge bg-warning bg-opacity-10 text-warning-emphasis border border-warning-subtle px-2 py-1 fw-semibold">
+                                            <i class="bi bi-exclamation-circle-fill me-1"></i>Incomplete
+                                        </span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-end pe-3">
+                                    <a href="{{ url_for('faculty.student_detail', profile_id=s.id) }}" class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-eye me-1"></i>Details
+                                    </a>
+                                </td>
+                            </tr>
+                        {% else %}
+                            <tr>
+                                <td colspan="7" class="text-center py-5 text-muted">
+                                    <i class="bi bi-person-x fs-1 d-block mb-2 text-secondary"></i>
+                                    No student profiles match the filter criteria.
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

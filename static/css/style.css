@@ -1,0 +1,522 @@
+/* =====================================================================
+   AI Group Project Team Builder - Modern Colorful Design System
+   Inspired by Linear, Stripe & Vercel Developer Platforms
+   ===================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+:root {
+    /* Brand Gradients */
+    --brand-gradient: linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #ec4899 100%);
+    --brand-glow: rgba(99, 102, 241, 0.25);
+    --ai-gradient: linear-gradient(135deg, #7c3aed 0%, #a855f7 50%, #ec4899 100%);
+    --baseline-gradient: linear-gradient(135deg, #0284c7 0%, #0ea5e9 50%, #06b6d4 100%);
+    
+    /* Category Colors */
+    --cat-frontend: #0284c7;
+    --cat-frontend-bg: #f0f9ff;
+    --cat-frontend-border: #bae6fd;
+
+    --cat-backend: #059669;
+    --cat-backend-bg: #ecfdf5;
+    --cat-backend-border: #a7f3d0;
+
+    --cat-data-ai: #7c3aed;
+    --cat-data-ai-bg: #faf5ff;
+    --cat-data-ai-border: #e9d5ff;
+
+    --cat-devops: #d97706;
+    --cat-devops-bg: #fffbeb;
+    --cat-devops-border: #fde68a;
+
+    --cat-design: #db2777;
+    --cat-design-bg: #fdf2f8;
+    --cat-design-border: #fbcfe8;
+
+    --cat-mobile: #4f46e5;
+    --cat-mobile-bg: #eef2ff;
+    --cat-mobile-border: #c7d2fe;
+
+    /* Base Theme */
+    --bg-page: #f8fafc;
+    --text-primary: #0f172a;
+    --text-secondary: #475569;
+    --text-muted: #64748b;
+    --card-bg: #ffffff;
+    --card-border: #e2e8f0;
+    --card-hover-border: #cbd5e1;
+}
+
+body {
+    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    background-color: var(--bg-page);
+    color: var(--text-primary);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    letter-spacing: -0.01em;
+}
+
+code, kbd, samp, pre {
+    font-family: 'JetBrains Mono', monospace;
+}
+
+/* =====================================================================
+   Navbar & Header
+   ===================================================================== */
+.navbar-custom {
+    background: rgba(15, 23, 42, 0.94);
+    backdrop-filter: blur(14px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.navbar-brand {
+    font-weight: 800;
+    font-size: 1.3rem;
+    letter-spacing: -0.03em;
+    color: #ffffff !important;
+}
+
+.brand-gradient-text {
+    background: var(--brand-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    display: inline-block;
+}
+
+.brand-ai-badge {
+    background: var(--ai-gradient);
+    color: #ffffff;
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    padding: 0.22rem 0.55rem;
+    border-radius: 9999px;
+    box-shadow: 0 0 12px rgba(168, 85, 247, 0.4);
+    text-transform: uppercase;
+}
+
+.nav-link {
+    font-weight: 600;
+    font-size: 0.88rem;
+    color: #cbd5e1 !important;
+    padding: 0.5rem 0.85rem !important;
+    border-radius: 0.5rem;
+    transition: all 0.2s ease;
+}
+
+.nav-link:hover, .nav-link.active {
+    color: #ffffff !important;
+    background: rgba(255, 255, 255, 0.08);
+}
+
+/* Live Database indicator pill */
+.db-pill {
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 0.3rem 0.65rem;
+    border-radius: 9999px;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    letter-spacing: 0.02em;
+}
+.db-pill-live {
+    background: rgba(16, 185, 129, 0.15);
+    color: #10b981;
+    border: 1px solid rgba(16, 185, 129, 0.35);
+}
+.db-pill-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background-color: #10b981;
+    box-shadow: 0 0 8px #10b981;
+    display: inline-block;
+    animation: pulseGlow 2s infinite;
+}
+@keyframes pulseGlow {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.85); }
+}
+
+/* =====================================================================
+   Cards & Elevated Surfaces
+   ===================================================================== */
+.card {
+    border: 1px solid var(--card-border);
+    border-radius: 1rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02), 0 1px 2px rgba(0, 0, 0, 0.04);
+    background-color: var(--card-bg);
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    overflow: hidden;
+}
+
+.card:hover {
+    box-shadow: 0 12px 28px -6px rgba(15, 23, 42, 0.08), 0 6px 12px -4px rgba(15, 23, 42, 0.04);
+    border-color: var(--card-hover-border);
+}
+
+.card-header {
+    background-color: #ffffff;
+    border-bottom: 1px solid var(--card-border);
+    font-weight: 700;
+    padding: 1.1rem 1.4rem;
+}
+
+/* Stat Cards */
+.stat-card {
+    position: relative;
+    padding: 1.3rem;
+    border-radius: 1rem;
+    background: #ffffff;
+    border: 1px solid var(--card-border);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+.stat-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 20px -5px rgba(99, 102, 241, 0.12);
+}
+.stat-card-accent-primary { border-top: 4px solid #6366f1; }
+.stat-card-accent-blue { border-top: 4px solid #0284c7; }
+.stat-card-accent-purple { border-top: 4px solid #a855f7; }
+.stat-card-accent-green { border-top: 4px solid #10b981; }
+
+.stat-icon-wrapper {
+    width: 48px;
+    height: 48px;
+    border-radius: 0.8rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+}
+
+.stat-card-number {
+    font-size: 2.2rem;
+    font-weight: 800;
+    letter-spacing: -0.04em;
+    line-height: 1.1;
+    margin: 0.3rem 0;
+}
+
+/* =====================================================================
+   Method Distinction Badges (Crucial for Evaluation Defense)
+   ===================================================================== */
+.badge-baseline {
+    background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%);
+    color: #0369a1;
+    border: 1px solid #7dd3fc;
+    font-weight: 700;
+    font-size: 0.78rem;
+    letter-spacing: 0.02em;
+    padding: 0.35rem 0.75rem;
+    border-radius: 0.5rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+.badge-ml {
+    background: linear-gradient(135deg, #f3e8ff 0%, #e9d5ff 100%);
+    color: #6b21a8;
+    border: 1px solid #c084fc;
+    font-weight: 700;
+    font-size: 0.78rem;
+    letter-spacing: 0.02em;
+    padding: 0.35rem 0.75rem;
+    border-radius: 0.5rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+/* =====================================================================
+   Skill Badges & Visual Proficiency Meters
+   ===================================================================== */
+.skill-badge {
+    background-color: #f8fafc;
+    color: #1e293b;
+    border: 1px solid #e2e8f0;
+    font-size: 0.8rem;
+    font-weight: 600;
+    border-radius: 0.5rem;
+    padding: 0.28rem 0.6rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin: 0.15rem;
+    transition: all 0.15s ease;
+}
+.skill-badge:hover {
+    background-color: #f1f5f9;
+    border-color: #cbd5e1;
+}
+
+/* Category-specific skill styling */
+.skill-cat-frontend { border-left: 3px solid var(--cat-frontend); }
+.skill-cat-backend { border-left: 3px solid var(--cat-backend); }
+.skill-cat-data { border-left: 3px solid var(--cat-data-ai); }
+.skill-cat-devops { border-left: 3px solid var(--cat-devops); }
+.skill-cat-design { border-left: 3px solid var(--cat-design); }
+
+/* 5-dot proficiency rating meter */
+.prof-dots {
+    display: inline-flex;
+    gap: 2px;
+    align-items: center;
+}
+.prof-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: #cbd5e1;
+}
+.prof-dot.active {
+    background-color: #4f46e5;
+    box-shadow: 0 0 4px rgba(79, 70, 229, 0.5);
+}
+
+.skill-prof-pill {
+    background: linear-gradient(135deg, #4f46e5, #7c3aed);
+    color: #ffffff;
+    border-radius: 9999px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 0.1rem 0.4rem;
+    min-width: 1.6rem;
+    text-align: center;
+}
+
+/* =====================================================================
+   Role Badges with Distinct Colors
+   ===================================================================== */
+.role-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.8rem;
+    font-weight: 700;
+    padding: 0.28rem 0.65rem;
+    border-radius: 0.5rem;
+    background-color: #ecfdf5;
+    color: #047857;
+    border: 1px solid #a7f3d0;
+}
+.role-badge-backend {
+    background-color: #ecfdf5;
+    color: #065f46;
+    border-color: #a7f3d0;
+}
+.role-badge-frontend {
+    background-color: #eff6ff;
+    color: #1d4ed8;
+    border-color: #bfdbfe;
+}
+.role-badge-data {
+    background-color: #faf5ff;
+    color: #6b21a8;
+    border-color: #e9d5ff;
+}
+.role-badge-qa {
+    background-color: #fffbeb;
+    color: #b45309;
+    border-color: #fde68a;
+}
+.role-badge-designer {
+    background-color: #fdf2f8;
+    color: #be185d;
+    border-color: #fbcfe8;
+}
+.role-badge-coordinator {
+    background-color: #f0fdfa;
+    color: #0f766e;
+    border-color: #99f6e4;
+}
+
+/* Cluster Archetype Badges */
+.cluster-badge {
+    background: linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%);
+    color: #7e22ce;
+    border: 1px solid #d8b4fe;
+    font-size: 0.78rem;
+    font-weight: 700;
+    padding: 0.28rem 0.65rem;
+    border-radius: 0.5rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+/* Avatars */
+.avatar-initials {
+    width: 40px;
+    height: 40px;
+    border-radius: 0.6rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 0.9rem;
+    color: #ffffff;
+    background: var(--brand-gradient);
+    flex-shrink: 0;
+    box-shadow: 0 2px 6px rgba(79, 70, 229, 0.25);
+}
+.avatar-initials-lg {
+    width: 52px;
+    height: 52px;
+    font-size: 1.15rem;
+}
+
+/* =====================================================================
+   Domain Pill Colors
+   ===================================================================== */
+.domain-pill {
+    font-size: 0.78rem;
+    font-weight: 700;
+    padding: 0.28rem 0.65rem;
+    border-radius: 9999px;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+.domain-health { background-color: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; }
+.domain-fintech { background-color: #eff6ff; color: #1e40af; border: 1px solid #bfdbfe; }
+.domain-iot { background-color: #fff7ed; color: #c2410c; border: 1px solid #fed7aa; }
+.domain-cyber { background-color: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; }
+.domain-web { background-color: #f5f3ff; color: #6d28d9; border: 1px solid #ddd6fe; }
+
+/* =====================================================================
+   Project Cards & Requirement Badges
+   ===================================================================== */
+.project-card {
+    border-radius: 1rem;
+    border: 1px solid var(--card-border);
+    transition: all 0.25s ease;
+}
+.project-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 16px 32px -8px rgba(15, 23, 42, 0.1);
+}
+
+.req-pill {
+    padding: 0.4rem 0.7rem;
+    border-radius: 0.6rem;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    font-size: 0.82rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+.req-pill-mand {
+    border-left: 3px solid #ef4444;
+}
+
+/* =====================================================================
+   Team Presentation Cards
+   ===================================================================== */
+.team-card {
+    border-top: 4px solid #6366f1;
+}
+.team-card-ml {
+    border-top: 4px solid #a855f7;
+}
+
+.team-member-row {
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid #f1f5f9;
+    transition: background-color 0.15s ease;
+}
+.team-member-row:last-child {
+    border-bottom: none;
+}
+.team-member-row:hover {
+    background-color: #f8fafc;
+}
+
+/* Match Score Ring Badge */
+.score-badge {
+    font-weight: 800;
+    font-size: 0.95rem;
+    padding: 0.35rem 0.7rem;
+    border-radius: 0.6rem;
+    background: #eef2ff;
+    color: #4338ca;
+    border: 1px solid #c7d2fe;
+    display: inline-block;
+}
+
+/* =====================================================================
+   Buttons
+   ===================================================================== */
+.btn {
+    font-weight: 600;
+    border-radius: 0.6rem;
+    padding: 0.55rem 1.1rem;
+    letter-spacing: -0.01em;
+    transition: all 0.18s ease;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
+    border: none;
+    box-shadow: 0 2px 6px rgba(79, 70, 229, 0.25);
+}
+.btn-primary:hover {
+    background: linear-gradient(135deg, #4338ca 0%, #4f46e5 100%);
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.35);
+    transform: translateY(-1px);
+}
+
+.btn-purple {
+    background: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%);
+    color: #ffffff;
+    border: none;
+    box-shadow: 0 2px 6px rgba(124, 58, 237, 0.25);
+}
+.btn-purple:hover {
+    background: linear-gradient(135deg, #6d28d9 0%, #9333ea 100%);
+    color: #ffffff;
+    box-shadow: 0 4px 12px rgba(124, 58, 237, 0.35);
+    transform: translateY(-1px);
+}
+
+.btn-outline-purple {
+    color: #7c3aed;
+    border-color: #d8b4fe;
+    background: #ffffff;
+}
+.btn-outline-purple:hover {
+    background: #faf5ff;
+    color: #6b21a8;
+    border-color: #c084fc;
+}
+
+/* =====================================================================
+   Comparison Table
+   ===================================================================== */
+.comparison-table th {
+    background-color: #f8fafc;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #475569;
+    padding: 0.85rem 1rem;
+}
+.comparison-table td {
+    padding: 0.9rem 1rem;
+}
+
+/* =====================================================================
+   Footer
+   ===================================================================== */
+footer {
+    margin-top: auto;
+    background-color: #ffffff;
+    border-top: 1px solid var(--card-border);
+    padding: 1.5rem 0;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}

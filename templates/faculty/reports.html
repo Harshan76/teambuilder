@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+{% block title %}Reports & CSV Exports - {{ project.title }}{% endblock %}
+
+{% block content %}
+<div class="row g-4 py-2">
+    <!-- Header -->
+    <div class="col-12">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+            <div>
+                <h1 class="h3 fw-bold mb-1">Reports & CSV Export Center</h1>
+                <p class="text-secondary mb-0">Project: <strong>{{ project.title }}</strong> &bull; Export assignments, evaluation tables, and audit logs.</p>
+            </div>
+            <a href="{{ url_for('faculty.dashboard') }}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-1"></i>Dashboard
+            </a>
+        </div>
+    </div>
+
+    <!-- Export Actions Cards -->
+    <div class="col-12 col-md-6">
+        <div class="card shadow-sm h-100">
+            <div class="card-body p-4 d-flex flex-column justify-content-between">
+                <div>
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                        <i class="bi bi-file-earmark-spreadsheet-fill text-success fs-3"></i>
+                        <h5 class="fw-bold mb-0">Final Team Assignments CSV</h5>
+                    </div>
+                    <p class="text-secondary small mb-4">
+                        Download a comprehensive spreadsheet containing all formed teams, mapped student IDs, assigned technical roles, fit scores, discovered cluster labels, and rationale explanations.
+                    </p>
+                </div>
+                <div class="d-grid">
+                    <a href="{{ url_for('report.export_teams', project_id=project.id) }}" class="btn btn-success fw-semibold">
+                        <i class="bi bi-download me-1"></i>Download Teams CSV
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 col-md-6">
+        <div class="card shadow-sm h-100">
+            <div class="card-body p-4 d-flex flex-column justify-content-between">
+                <div>
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                        <i class="bi bi-file-earmark-bar-graph-fill text-primary fs-3"></i>
+                        <h5 class="fw-bold mb-0">Baseline vs. ML Benchmark CSV</h5>
+                    </div>
+                    <p class="text-secondary small mb-4">
+                        Download the side-by-side comparative evaluation metrics table including skill coverage ratios, role coverage, availability compatibility, constraint satisfaction, and runtimes.
+                    </p>
+                </div>
+                <div class="d-grid">
+                    <a href="{{ url_for('report.export_comparison', project_id=project.id) }}" class="btn btn-primary fw-semibold">
+                        <i class="bi bi-download me-1"></i>Download Comparison CSV
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Metric Definitions Reference Table -->
+    <div class="col-12">
+        <div class="card shadow-sm">
+            <div class="card-header bg-white">
+                <h5 class="fw-bold mb-0 text-dark"><i class="bi bi-book text-primary me-2"></i>Mathematical Metric Definitions</h5>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-bordered align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th style="width: 25%;">Evaluation Metric</th>
+                            <th style="width: 45%;">Formula & Definition</th>
+                            <th style="width: 30%;">Operational Interpretation</th>
+                        </tr>
+                    </thead>
+                    <tbody class="small text-secondary">
+                        <tr>
+                            <td class="fw-bold text-dark">Skill Coverage Ratio</td>
+                            <td><code>Mean_{Teams}(|CoveredReqSkills| / |TotalReqSkills|)</code></td>
+                            <td>Fraction of required project skills possessing at least one team member at or above minimum proficiency.</td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold text-dark">Avg Skill Alignment</td>
+                            <td><code>Mean_{Students}(Sum min(1.0, Prof / MinProf) / |ReqSkills|)</code></td>
+                            <td>Individual technical depth for project requirements.</td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold text-dark">Availability Compatibility</td>
+                            <td><code>Mean_{Teams}(2 / (N*(N-1)) * Sum Jaccard(Slots_i, Slots_j))</code></td>
+                            <td>Pairwise Jaccard similarity of weekly schedule slots among team members.</td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold text-dark">Role Coverage Ratio</td>
+                            <td><code>Mean_{Teams}(|FulfilledReqRoles| / |TotalReqRoles|)</code></td>
+                            <td>Fraction of project required responsibilities covered by qualified members.</td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold text-dark">Constraint Satisfaction Rate</td>
+                            <td><code>Count(ValidTeams) / TotalTeams</code></td>
+                            <td>Fraction of teams strictly satisfying team size bounds and mandatory skill constraints.</td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold text-dark">Assignment Completeness</td>
+                            <td><code>AssignedStudents / TotalEligibleStudents</code></td>
+                            <td>Fraction of eligible students successfully allocated to a team.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

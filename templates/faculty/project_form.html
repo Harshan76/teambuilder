@@ -1,0 +1,186 @@
+{% extends "base.html" %}
+{% block title %}{% if project %}Edit Project - {{ project.title }}{% else %}New Project Specification - Team Builder{% endif %}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center py-2">
+    <div class="col-12 col-xl-10">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+            <div>
+                <h1 class="h3 fw-bold mb-1">{% if project %}Edit Academic Project{% else %}Create Academic Project{% endif %}</h1>
+                <p class="text-secondary mb-0">Specify project domain, technical skill requirements, team bounds, and role allocations.</p>
+            </div>
+            <a href="{{ url_for('faculty.projects_list') }}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-1"></i>Back to Projects
+            </a>
+        </div>
+
+        <form method="POST">
+            <!-- Project Basic Info -->
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header bg-white fw-bold py-3">
+                    <i class="bi bi-info-circle-fill text-primary me-2"></i>1. Project Overview &amp; Scope
+                </div>
+                <div class="card-body p-4">
+                    <div class="row g-3">
+                        <div class="col-12 col-md-8">
+                            <label for="title" class="form-label fw-semibold text-dark">Project Title *</label>
+                            <input type="text" class="form-control" id="title" name="title" value="{{ project.title if project else '' }}" required placeholder="e.g. Distributed Cloud File Storage Portal">
+                        </div>
+                        <div class="col-12 col-md-4">
+                            <label for="domain" class="form-label fw-semibold text-dark">Domain / Category *</label>
+                            <select class="form-select" id="domain" name="domain" required>
+                                {% for dom in ["Web Application Development", "Machine Learning & Data Science", "Cloud Native & Distributed Systems", "Healthcare & BioInformatics", "FinTech & Blockchain", "Internet of Things (IoT)", "Cybersecurity & Privacy"] %}
+                                    <option value="{{ dom }}" {% if project and project.domain == dom %}selected{% endif %}>{{ dom }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-12">
+                            <label for="description" class="form-label fw-semibold text-dark">Project Description &amp; Deliverables</label>
+                            <textarea class="form-control" id="description" name="description" rows="3" placeholder="Provide background, core architectural deliverables, and expected milestones.">{{ project.description if project else '' }}</textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Team Size & Constraints -->
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header bg-white fw-bold py-3">
+                    <i class="bi bi-people-fill text-primary me-2"></i>2. Team Size Bounds &amp; Experience Prerequisites
+                </div>
+                <div class="card-body p-4">
+                    <div class="row g-3">
+                        <div class="col-12 col-md-3">
+                            <label for="desired_team_size" class="form-label fw-semibold text-dark">Target Team Size *</label>
+                            <input type="number" min="2" max="10" class="form-control" id="desired_team_size" name="desired_team_size" value="{{ project.desired_team_size if project else 4 }}" required>
+                            <div class="form-text small text-muted">Exact students per team</div>
+                        </div>
+                        <div class="col-12 col-md-3">
+                            <label for="min_team_size" class="form-label fw-semibold text-dark">Min Allowed Size *</label>
+                            <input type="number" min="2" max="10" class="form-control" id="min_team_size" name="min_team_size" value="{{ project.min_team_size if project else 3 }}" required>
+                            <div class="form-text small text-muted">Lower feasibility bound</div>
+                        </div>
+                        <div class="col-12 col-md-3">
+                            <label for="max_team_size" class="form-label fw-semibold text-dark">Max Allowed Size *</label>
+                            <input type="number" min="2" max="10" class="form-control" id="max_team_size" name="max_team_size" value="{{ project.max_team_size if project else 5 }}" required>
+                            <div class="form-text small text-muted">Upper capacity bound</div>
+                        </div>
+                        <div class="col-12 col-md-3">
+                            <label for="experience_level_required" class="form-label fw-semibold text-dark">Prerequisite Experience</label>
+                            <select class="form-select" id="experience_level_required" name="experience_level_required">
+                                <option value="Any" {% if not project or project.experience_level_required == 'Any' %}selected{% endif %}>Any Experience Level</option>
+                                <option value="Beginner" {% if project and project.experience_level_required == 'Beginner' %}selected{% endif %}>Beginner</option>
+                                <option value="Intermediate" {% if project and project.experience_level_required == 'Intermediate' %}selected{% endif %}>Intermediate</option>
+                                <option value="Advanced" {% if project and project.experience_level_required == 'Advanced' %}selected{% endif %}>Advanced</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Required Skills Specification -->
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center py-3">
+                    <span class="fw-bold fs-6"><i class="bi bi-code-slash text-primary me-2"></i>3. Technical Skill Requirements</span>
+                    <span class="small text-muted">Select required skills, min proficiency (1-5), and priority weight</span>
+                </div>
+                <div class="card-body p-4">
+                    {% set existing_req_map = {} %}
+                    {% if project %}
+                        {% for rs in project.required_skills %}
+                            {% set _ = existing_req_map.update({rs.skill_id: rs}) %}
+                        {% endfor %}
+                    {% endif %}
+
+                    <div class="row g-3">
+                        {% for s in catalogs.skills %}
+                            {% set is_selected = s.id in existing_req_map %}
+                            {% set req_item = existing_req_map.get(s.id) %}
+                            <div class="col-12 col-md-6 col-xl-4">
+                                <div class="p-3 border rounded-3 bg-light h-100">
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="checkbox" name="required_skill_id" value="{{ s.id }}" id="req_sk_{{ s.id }}" {% if is_selected %}checked{% endif %}>
+                                        <label class="form-check-label fw-bold text-dark" for="req_sk_{{ s.id }}">
+                                            {{ s.name }} <span class="badge bg-secondary bg-opacity-10 text-secondary border ms-1" style="font-size: 0.68rem;">{{ s.category }}</span>
+                                        </label>
+                                    </div>
+
+                                    <div class="row g-2 align-items-center">
+                                        <div class="col-6">
+                                            <label class="form-label small text-muted mb-1">Min Proficiency:</label>
+                                            <select class="form-select form-select-sm" name="skill_prof_{{ s.id }}">
+                                                {% for p_lvl in [1, 2, 3, 4, 5] %}
+                                                    <option value="{{ p_lvl }}" {% if req_item and req_item.min_proficiency == p_lvl %}selected{% elif not req_item and p_lvl == 2 %}selected{% endif %}>Lvl {{ p_lvl }}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                        <div class="col-6">
+                                            <label class="form-label small text-muted mb-1">Priority Weight:</label>
+                                            <select class="form-select form-select-sm" name="skill_weight_{{ s.id }}">
+                                                <option value="0.8" {% if req_item and req_item.priority_weight == 0.8 %}selected{% endif %}>Low (0.8x)</option>
+                                                <option value="1.0" {% if not req_item or req_item.priority_weight == 1.0 %}selected{% endif %}>Normal (1.0x)</option>
+                                                <option value="1.2" {% if req_item and req_item.priority_weight == 1.2 %}selected{% endif %}>High (1.2x)</option>
+                                                <option value="1.5" {% if req_item and req_item.priority_weight == 1.5 %}selected{% endif %}>Critical (1.5x)</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-12 mt-2">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" name="skill_mand_{{ s.id }}" id="mand_{{ s.id }}" {% if not req_item or req_item.is_mandatory %}checked{% endif %}>
+                                                <label class="form-check-label small text-secondary" for="mand_{{ s.id }}">
+                                                    Mandatory Constraint (Must be satisfied)
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Required Roles Specification -->
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header bg-white fw-bold py-3">
+                    <i class="bi bi-person-badge-fill text-primary me-2"></i>4. Required Team Roles &amp; Headcount
+                </div>
+                <div class="card-body p-4">
+                    {% set existing_role_map = {} %}
+                    {% if project %}
+                        {% for rr in project.required_roles %}
+                            {% set _ = existing_role_map.update({rr.role_id: rr.count_needed}) %}
+                        {% endfor %}
+                    {% endif %}
+
+                    <div class="row g-3">
+                        {% for r in catalogs.roles %}
+                            {% set is_role_req = r.id in existing_role_map %}
+                            {% set count = existing_role_map.get(r.id, 1) %}
+                            <div class="col-12 col-sm-6 col-lg-4">
+                                <div class="p-3 border rounded-3 bg-light d-flex justify-content-between align-items-center">
+                                    <div class="form-check mb-0">
+                                        <input class="form-check-input" type="checkbox" name="required_role_id" value="{{ r.id }}" id="req_rl_{{ r.id }}" {% if is_role_req or not project %}checked{% endif %}>
+                                        <label class="form-check-label fw-semibold small text-dark" for="req_rl_{{ r.id }}">
+                                            {{ r.name }}
+                                        </label>
+                                    </div>
+                                    <div style="width: 75px;">
+                                        <input type="number" min="1" max="5" class="form-control form-control-sm text-center" name="role_count_{{ r.id }}" value="{{ count }}">
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="d-flex justify-content-end gap-2 mb-5">
+                <a href="{{ url_for('faculty.projects_list') }}" class="btn btn-outline-secondary">Cancel</a>
+                <button type="submit" class="btn btn-primary btn-lg px-4 fw-semibold">
+                    <i class="bi bi-save me-1"></i>Save Project Specifications
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
