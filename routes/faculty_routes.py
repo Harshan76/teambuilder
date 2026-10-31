@@ -164,6 +164,7 @@ def project_create():
             flash(f"Academic Project '{new_proj.title}' created successfully!", "success")
             return redirect(url_for("faculty.projects_list"))
         except Exception as e:
+            db.rollback()
             flash(f"Error creating project: {e}", "danger")
 
     return render_template(
@@ -240,6 +241,7 @@ def project_edit(project_id):
             flash(f"Project '{project.title}' updated successfully!", "success")
             return redirect(url_for("faculty.projects_list"))
         except Exception as e:
+            db.rollback()
             flash(f"Error updating project: {e}", "danger")
 
     return render_template(

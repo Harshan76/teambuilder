@@ -98,6 +98,7 @@ def profile_edit():
             flash("Profile updated successfully! Completeness verified.", "success")
             return redirect(url_for("student.dashboard"))
         except Exception as e:
+            db.rollback()
             flash(f"Error updating profile: {e}", "danger")
 
     # Current profile selections

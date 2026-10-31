@@ -8,7 +8,11 @@ def get_current_user():
     if not user_id:
         return None
     db = get_db()
-    return db.query(User).filter_by(id=user_id).first()
+    try:
+        return db.query(User).filter_by(id=user_id).first()
+    except Exception:
+        db.rollback()
+        return None
 
 def login_user(user):
     session.clear()

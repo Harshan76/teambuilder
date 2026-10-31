@@ -28,18 +28,44 @@ class DatabaseManager:
         # Connect MySQL if configured
         if uri.startswith("mysql"):
             try:
+                from sqlalchemy.engine.url import make_url
+                parsed_url = make_url(uri)
+                query_params = dict(parsed_url.query)
+
+                # Robust handling of cloud MySQL (Aiven, Railway, AWS, etc.)
+                # PyMySQL raises TypeError on '?ssl-mode=REQUIRED' in URL query parameters.
+                # We strip it from query and configure PyMySQL's SSL connect_args properly.
+                ssl_mode = query_params.pop("ssl-mode", None) or query_params.pop("ssl_mode", None)
+                host_str = (parsed_url.host or "").lower()
+                is_cloud_mysql = any(k in host_str for k in ["aivencloud.com", "railway.app", "amazonaws.com", "render.com", "azure.com"])
+                enable_ssl = bool(
+                    ssl_mode
+                    or is_cloud_mysql
+                    or os.getenv("MYSQL_SSL", "").lower() in ("true", "1", "required", "yes")
+                )
+
+                clean_url = parsed_url.set(query=query_params)
+
+                connect_args = {"connect_timeout": 10}
+                if enable_ssl:
+                    ssl_dict = {"check_hostname": False}
+                    ca_path = os.getenv("MYSQL_SSL_CA") or os.getenv("SSL_CA")
+                    if ca_path and os.path.exists(ca_path):
+                        ssl_dict["ca"] = ca_path
+                    connect_args["ssl"] = ssl_dict
+
                 # Production-ready MySQL engine with connection pool recycling and ping
                 engine_kwargs = {
                     "pool_pre_ping": True,
                     "pool_recycle": 300,
-                    "connect_args": {"connect_timeout": 10}
+                    "connect_args": connect_args
                 }
-                test_engine = create_engine(uri, **engine_kwargs)
+                test_engine = create_engine(clean_url, **engine_kwargs)
                 with test_engine.connect() as conn:
                     conn.execute(text("SELECT 1"))
                 self.engine = test_engine
                 self.db_type = "mysql"
-                self.connection_status_message = f"Connected to MySQL on {Config.MYSQL_HOST}:{Config.MYSQL_PORT} ({Config.MYSQL_DATABASE})"
+                self.connection_status_message = f"Connected to MySQL on {parsed_url.host}:{parsed_url.port or 3306} ({parsed_url.database})"
                 logger.info(self.connection_status_message)
             except Exception as e:
                 # In production (Railway, explicit DATABASE_URL / MYSQL_URL / MYSQLHOST set), raise error instead of silent degrade
@@ -89,6 +115,14 @@ class DatabaseManager:
         if not getattr(self, "initialized", False):
             self.init_db()
         return self.Session()
+
+    def remove_session(self):
+        """Cleanly removes thread-local scoped session and releases connection to pool."""
+        if getattr(self, "Session", None) is not None:
+            try:
+                self.Session.remove()
+            except Exception as e:
+                logger.warning(f"Error removing scoped session: {e}")
 
 db_manager = DatabaseManager()
 

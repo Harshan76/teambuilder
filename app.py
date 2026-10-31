@@ -50,6 +50,11 @@ def create_app(config_class=Config):
             "db_status_message": db_manager.connection_status_message
         }
 
+    # Teardown Application Context: clean up scoped sessions after each request
+    @app.teardown_appcontext
+    def shutdown_session(exception=None):
+        db_manager.remove_session()
+
     # Production Health-Check Endpoints
     @app.route("/health")
     @app.route("/api/health")
