@@ -144,9 +144,11 @@ def register():
 
     return render_template("auth/register.html", current_user=get_current_user())
 
-@auth_bp.route("/logout")
+@auth_bp.route("/logout", methods=["GET", "POST"])
 def logout():
-    """Logout endpoint. Clears session and redirects to login."""
+    """Logout endpoint. Clears user session, removes database scoped session, and redirects safely."""
+    from database.db import db_manager
     logout_user()
+    db_manager.remove_session()
     flash("You have been securely logged out.", "info")
     return redirect(url_for("auth.login"))

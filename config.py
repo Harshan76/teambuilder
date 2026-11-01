@@ -19,15 +19,15 @@ class Config:
     ML_MODEL_DIR = BASE_DIR / "ml_models"
     ML_MODEL_DIR.mkdir(parents=True, exist_ok=True)
     
-    # MySQL Database Settings (Supports both standard names and Railway injected variables)
-    MYSQL_HOST = os.getenv("MYSQL_HOST") or os.getenv("MYSQLHOST") or "localhost"
-    MYSQL_PORT = int(os.getenv("MYSQL_PORT") or os.getenv("MYSQLPORT") or 3306)
-    MYSQL_USER = os.getenv("MYSQL_USER") or os.getenv("MYSQLUSER") or "root"
-    MYSQL_PASSWORD = os.getenv("MYSQL_PASSWORD") or os.getenv("MYSQLPASSWORD") or ""
-    MYSQL_DATABASE = os.getenv("MYSQL_DATABASE") or os.getenv("MYSQLDATABASE") or "ai_team_builder"
+    # MySQL Database Settings (Supports standard names, Aiven, and Railway/Render injected variables)
+    MYSQL_HOST = os.getenv("MYSQL_HOST") or os.getenv("MYSQLHOST") or os.getenv("AIVEN_HOST") or "localhost"
+    MYSQL_PORT = int(os.getenv("MYSQL_PORT") or os.getenv("MYSQLPORT") or os.getenv("AIVEN_PORT") or 3306)
+    MYSQL_USER = os.getenv("MYSQL_USER") or os.getenv("MYSQLUSER") or os.getenv("AIVEN_USER") or "root"
+    MYSQL_PASSWORD = os.getenv("MYSQL_PASSWORD") or os.getenv("MYSQLPASSWORD") or os.getenv("AIVEN_PASSWORD") or ""
+    MYSQL_DATABASE = os.getenv("MYSQL_DATABASE") or os.getenv("MYSQLDATABASE") or os.getenv("AIVEN_DATABASE") or "ai_team_builder"
     
-    # Database URL overrides (Railway injects DATABASE_URL or MYSQL_URL)
-    DATABASE_URL = os.getenv("DATABASE_URL") or os.getenv("MYSQL_URL")
+    # Database URL overrides (Render/Railway/Aiven injects DATABASE_URL, MYSQL_URL, or AIVEN_MYSQL_URL)
+    DATABASE_URL = os.getenv("DATABASE_URL") or os.getenv("MYSQL_URL") or os.getenv("AIVEN_MYSQL_URL")
     
     # Auto-seed trigger for first-time production deployment
     AUTO_SEED = os.getenv("AUTO_SEED", "false").lower() in ("true", "1", "yes")

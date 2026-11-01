@@ -143,6 +143,8 @@ class ProjectService:
         """
         Determines the eligible student cohort for a project.
         Enforces fair baseline-vs-ML evaluation by providing the identical pool.
+        Identifies specific reasons for any excluded students without unnecessarily
+        excluding candidates due to missing optional profile attributes.
         Returns:
             eligible_profiles: list of StudentProfile
             ineligible_info: list of dicts with student_id, name, reason
@@ -157,32 +159,53 @@ class ProjectService:
         ineligible = []
 
         for p in all_profiles:
-            # 1. Profile completion check
-            if enforce_profile_completion and not p.is_profile_complete:
-                ineligible.append({
-                    "profile_id": p.id,
-                    "student_id": p.student_id,
-                    "name": p.user.full_name if p.user else "Unknown",
-                    "reason": "Profile incomplete (missing skills, interests, or availability)"
-                })
+            # 0. Student user check
+            user = p.user
+            if not user or user.role != "student":
                 continue
 
-            # 2. Experience level requirement check if strict
-            if project.experience_level_required != "Any":
+            reasons = []
+
+            # 1. Check if already committed to a finalized team for THIS project
+            if p.team_memberships:
+                finalized_in_proj = [
+                    tm.team.name for tm in p.team_memberships
+                    if tm.team and tm.team.project_id == project.id and tm.team.status == "Finalized"
+                ]
+                if finalized_in_proj:
+                    reasons.append(f"Already assigned to finalized team ({finalized_in_proj[0]})")
+
+            # 2. Technical Skills requirement (Essential for skill vector matching)
+            if not p.skills or len(p.skills) == 0:
+                reasons.append("No technical skills recorded (at least 1 technical skill with proficiency required)")
+
+            # 3. Availability requirement (Essential for schedule coordination)
+            if not p.availability or len(p.availability) == 0:
+                reasons.append("No availability schedule specified (at least 1 weekly time slot required)")
+
+            # 4. Experience level requirement check if strict
+            if project.experience_level_required and project.experience_level_required != "Any":
                 exp_rank = {"Beginner": 1, "Intermediate": 2, "Advanced": 3}
                 req_rank = exp_rank.get(project.experience_level_required, 1)
                 stu_rank = exp_rank.get(p.experience_level, 1)
-                # We consider students eligible if they are within suitable range (not blocking unless strictly desired)
-                # To be flexible, we allow students with >= 1 level below or equal
+                # Allow students within 1 tier below or equal
                 if stu_rank < (req_rank - 1):
-                    ineligible.append({
-                        "profile_id": p.id,
-                        "student_id": p.student_id,
-                        "name": p.user.full_name if p.user else "Unknown",
-                        "reason": f"Experience level ({p.experience_level}) below project prerequisite ({project.experience_level_required})"
-                    })
-                    continue
+                    reasons.append(
+                        f"Experience level ({p.experience_level or 'Beginner'}) below project prerequisite ({project.experience_level_required})"
+                    )
 
-            eligible.append(p)
+            # Note: Optional fields like domain interests, preferred roles, past project summary,
+            # and collaboration preferences are beneficial for higher fidelity scores, but do NOT
+            # disqualify students from participation.
+
+            if reasons:
+                ineligible.append({
+                    "profile_id": p.id,
+                    "student_id": p.student_id,
+                    "name": user.full_name,
+                    "reason": "; ".join(reasons)
+                })
+            else:
+                eligible.append(p)
 
         return eligible, ineligible

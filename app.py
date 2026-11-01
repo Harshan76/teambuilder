@@ -118,6 +118,7 @@ def create_app(config_class=Config):
 
     @app.errorhandler(500)
     def internal_server_error(e):
+        db_manager.remove_session()
         return render_template("500.html"), 500
 
     return app

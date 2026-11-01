@@ -79,3 +79,24 @@ def test_login_never_inserts_user_and_preserves_session(client, db_session):
     res_good = client.post("/login", data={"email": "faculty@college.edu", "password": "Faculty@123"}, follow_redirects=True)
     assert res_good.status_code == 200
     assert b"Welcome back" in res_good.data
+
+def test_logout_and_session_cleanup(client):
+    # 1. Log in as student
+    client.post("/login", data={"email": "student1@college.edu", "password": "Student@123"}, follow_redirects=True)
+    res_dash = client.get("/student/dashboard")
+    assert res_dash.status_code == 200
+
+    # 2. Test GET /logout
+    res_logout_get = client.get("/logout", follow_redirects=True)
+    assert res_logout_get.status_code == 200
+    assert b"logged out" in res_logout_get.data
+
+    # 3. Verify session is destroyed
+    res_dash_after = client.get("/student/dashboard", follow_redirects=True)
+    assert b"Please log in" in res_dash_after.data
+
+    # 4. Test POST /logout
+    client.post("/login", data={"email": "faculty@college.edu", "password": "Faculty@123"}, follow_redirects=True)
+    res_logout_post = client.post("/logout", follow_redirects=True)
+    assert res_logout_post.status_code == 200
+    assert b"logged out" in res_logout_post.data

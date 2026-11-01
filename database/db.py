@@ -57,7 +57,9 @@ class DatabaseManager:
                 # Production-ready MySQL engine with connection pool recycling and ping
                 engine_kwargs = {
                     "pool_pre_ping": True,
-                    "pool_recycle": 300,
+                    "pool_recycle": 180,
+                    "pool_size": int(os.getenv("MYSQL_POOL_SIZE", 10)),
+                    "max_overflow": int(os.getenv("MYSQL_MAX_OVERFLOW", 20)),
                     "connect_args": connect_args
                 }
                 test_engine = create_engine(clean_url, **engine_kwargs)
@@ -71,6 +73,7 @@ class DatabaseManager:
                 # In production (Railway, explicit DATABASE_URL / MYSQL_URL / MYSQLHOST set), raise error instead of silent degrade
                 is_prod = bool(
                     os.getenv("RAILWAY_ENVIRONMENT")
+                    or os.getenv("RENDER")
                     or os.getenv("FLASK_ENV") == "production"
                     or os.getenv("DATABASE_URL")
                     or os.getenv("MYSQL_URL")

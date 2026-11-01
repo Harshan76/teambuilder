@@ -12,6 +12,7 @@ worker_class = "gthread"
 # Request timeouts (120s accommodates clustering & data preparation)
 timeout = int(os.environ.get("GUNICORN_TIMEOUT", "120"))
 keepalive = int(os.environ.get("GUNICORN_KEEPALIVE", "5"))
+graceful_timeout = int(os.environ.get("GUNICORN_GRACEFUL_TIMEOUT", "30"))
 
 # Stream logs directly to stdout/stderr for Railway real-time logging
 accesslog = "-"

@@ -102,17 +102,41 @@ class StudentService:
             # Clear existing skills
             db.query(StudentSkill).filter_by(profile_id=profile.id).delete()
             db.flush()
-            # data["skills"] should be a dict or list of dicts: [{"skill_id": int, "proficiency": int}]
             skills_input = data["skills"]
             if isinstance(skills_input, dict):
-                skills_list = [{"skill_id": int(k), "proficiency": int(v)} for k, v in skills_input.items()]
+                skills_list = [{"skill_id": k, "proficiency": v} for k, v in skills_input.items()]
             else:
-                skills_list = skills_input
+                skills_list = skills_input or []
 
+            seen_skill_ids = set()
             for item in skills_list:
-                s_id = int(item["skill_id"])
-                prof = max(1, min(5, int(item.get("proficiency", 1))))
-                db.add(StudentSkill(profile_id=profile.id, skill_id=s_id, proficiency=prof))
+                s_id = None
+                prof = 1
+                if isinstance(item, dict):
+                    if "skill_id" in item and item["skill_id"]:
+                        try:
+                            s_id = int(item["skill_id"])
+                        except (ValueError, TypeError):
+                            s_id = None
+                    elif "name" in item and item["name"]:
+                        sk_obj = db.query(Skill).filter(Skill.name.ilike(item["name"].strip())).first()
+                        if sk_obj:
+                            s_id = sk_obj.id
+                    try:
+                        prof = max(1, min(5, int(item.get("proficiency", 1))))
+                    except (ValueError, TypeError):
+                        prof = 1
+                elif item:
+                    try:
+                        s_id = int(item)
+                    except (ValueError, TypeError):
+                        s_id = None
+
+                if s_id and s_id not in seen_skill_ids:
+                    sk_exists = db.query(Skill).filter_by(id=s_id).first()
+                    if sk_exists:
+                        seen_skill_ids.add(s_id)
+                        db.add(StudentSkill(profile_id=profile.id, skill_id=s_id, proficiency=prof))
 
         # Update Interests
         if "interest_ids" in data:

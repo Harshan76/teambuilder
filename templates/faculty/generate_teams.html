@@ -36,6 +36,15 @@
                         <p class="text-secondary mb-0 small" style="line-height: 1.5;">
                             Both the <strong>Rule-Based Baseline</strong> and the <strong>AI/ML Approach</strong> will operate on this identical pool of {{ eligible_students|length }} students, producing <strong>{{ eligible_students|length // project.desired_team_size }} teams</strong> of {{ project.desired_team_size }} members for a completely fair side-by-side benchmark.
                         </p>
+                        {% if eligible_students|length < project.min_team_size %}
+                            <div class="alert alert-warning border-warning mt-3 mb-0 small d-flex align-items-center gap-2">
+                                <i class="bi bi-exclamation-triangle-fill text-warning fs-5"></i>
+                                <div>
+                                    <strong>Insufficient Eligible Students:</strong> At least <strong>{{ project.min_team_size }}</strong> eligible candidates are required to form a team (Target team size: <strong>{{ project.desired_team_size }}</strong>), but only <strong>{{ eligible_students|length }}</strong> eligible students are available.
+                                    {% if ineligible_students %}Review the {{ ineligible_students|length }} excluded candidates below to see the specific missing profile items.{% endif %}
+                                </div>
+                            </div>
+                        {% endif %}
                     </div>
                     {% if ineligible_students %}
                         <div>
@@ -126,7 +135,7 @@
                     </div>
 
                     <div class="d-grid pt-2">
-                        <button type="submit" class="btn btn-primary btn-lg fw-semibold">
+                        <button type="submit" class="btn btn-primary btn-lg fw-semibold" {% if eligible_students|length < project.min_team_size %}disabled title="At least {{ project.min_team_size }} eligible candidates required"{% endif %}>
                             <i class="bi bi-play-circle-fill me-1"></i>Generate Baseline Teams
                         </button>
                     </div>
@@ -180,7 +189,7 @@
                     </div>
 
                     <div class="d-grid pt-2">
-                        <button type="submit" class="btn btn-purple btn-lg fw-semibold text-white">
+                        <button type="submit" class="btn btn-purple btn-lg fw-semibold text-white" {% if eligible_students|length < project.min_team_size %}disabled title="At least {{ project.min_team_size }} eligible candidates required"{% endif %}>
                             <i class="bi bi-lightning-charge-fill me-1"></i>Fit K-Means & Recommend Teams
                         </button>
                     </div>

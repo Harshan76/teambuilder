@@ -28,19 +28,25 @@ SKILLS_DATA = [
     {"name": "Java", "category": "Backend"},
     {"name": "Flask", "category": "Backend"},
     {"name": "Django", "category": "Backend"},
+    {"name": "Backend Development", "category": "Backend"},
     # Data & AI
     {"name": "Scikit-learn", "category": "Data/AI"},
     {"name": "Pandas", "category": "Data/AI"},
     {"name": "PyTorch", "category": "Data/AI"},
     {"name": "SQL", "category": "Data/AI"},
     {"name": "TensorFlow", "category": "Data/AI"},
+    {"name": "Machine Learning", "category": "Data/AI"},
+    {"name": "Data Science", "category": "Data/AI"},
+    {"name": "Data Analytics", "category": "Data/AI"},
     # DevOps & Infrastructure
     {"name": "Docker", "category": "DevOps"},
     {"name": "Git/GitHub", "category": "DevOps"},
     {"name": "Linux", "category": "DevOps"},
     {"name": "AWS", "category": "DevOps"},
+    {"name": "Cloud Computing", "category": "DevOps"},
     # Design & Mobile
     {"name": "Figma/UI Design", "category": "Design/Mobile"},
+    {"name": "UI/UX", "category": "Design/Mobile"},
     {"name": "Flutter", "category": "Design/Mobile"},
 ]
 
@@ -54,14 +60,32 @@ INTERESTS_DATA = [
     {"name": "Cybersecurity & Privacy", "description": "Secure coding practices, encryption, and threat vulnerability management"}
 ]
 
-SLOTS_DATA = [
-    {"slot_name": "Weekday Mornings", "time_range": "Mon-Fri 08:00 - 12:00"},
-    {"slot_name": "Weekday Afternoons", "time_range": "Mon-Fri 12:00 - 17:00"},
-    {"slot_name": "Weekday Evenings", "time_range": "Mon-Fri 17:00 - 21:00"},
-    {"slot_name": "Weekend Mornings", "time_range": "Sat-Sun 09:00 - 13:00"},
-    {"slot_name": "Weekend Afternoons", "time_range": "Sat-Sun 13:00 - 18:00"},
-    {"slot_name": "Flexible / Anytime", "time_range": "Adaptable schedule upon team sync"}
-]
+def get_dynamic_slots_data():
+    """Generates dynamic upcoming schedule windows in Asia/Kolkata timezone (IST)."""
+    from datetime import datetime, timedelta, timezone
+    ist = timezone(timedelta(hours=5, minutes=30))
+    now = datetime.now(ist)
+    days_to_mon = (0 - now.weekday() + 7) % 7
+    if days_to_mon == 0:
+        days_to_mon = 7
+    next_mon = now + timedelta(days=days_to_mon)
+    next_fri = next_mon + timedelta(days=4)
+    next_sat = next_mon + timedelta(days=5)
+    next_sun = next_mon + timedelta(days=6)
+    
+    wk_str = f"{next_mon.strftime('%b %d')} - {next_fri.strftime('%b %d, %Y')}"
+    wknd_str = f"{next_sat.strftime('%b %d')} - {next_sun.strftime('%b %d, %Y')}"
+    
+    return [
+        {"slot_name": "Weekday Mornings", "time_range": f"Mon-Fri 09:00 - 12:00 IST ({wk_str})"},
+        {"slot_name": "Weekday Afternoons", "time_range": f"Mon-Fri 13:00 - 17:00 IST ({wk_str})"},
+        {"slot_name": "Weekday Evenings", "time_range": f"Mon-Fri 18:00 - 21:00 IST ({wk_str})"},
+        {"slot_name": "Weekend Mornings", "time_range": f"Sat-Sun 10:00 - 14:00 IST ({wknd_str})"},
+        {"slot_name": "Weekend Afternoons", "time_range": f"Sat-Sun 14:00 - 18:00 IST ({wknd_str})"},
+        {"slot_name": "Flexible / Anytime", "time_range": "Adaptable schedule upon team sync (Asia/Kolkata)"}
+    ]
+
+SLOTS_DATA = get_dynamic_slots_data()
 
 ROLES_DATA = [
     {
@@ -96,8 +120,156 @@ ROLES_DATA = [
     }
 ]
 
-# 24 Synthetic Students with realistic, rich portfolios
-STUDENTS_DATA = [
+# Demonstration & Evaluation Student Cohort (16 Diverse Accounts)
+DEMO_EVALUATION_STUDENTS = [
+    {
+        "email": "student1@college.edu", "full_name": "Alex Chen", "student_id": "DEMO-2026-001", "department": "Computer Science",
+        "experience_level": "Advanced", "experience_years": 3.0,
+        "previous_projects": "Architected an asynchronous event-driven REST API handling 2,500 req/sec using Python, Flask, Redis, and MySQL. Implemented container orchestration.",
+        "skills": {"Python": 5, "Backend Development": 5, "SQL": 4, "Cloud Computing": 3, "Docker": 3, "Git/GitHub": 4},
+        "interests": ["Web Application Development", "Cloud Native & Distributed Systems"],
+        "availability": ["Weekday Evenings", "Weekend Mornings", "Flexible / Anytime"],
+        "roles": [("Backend Developer", 1), ("QA / Testing Engineer", 2)]
+    },
+    {
+        "email": "student2@college.edu", "full_name": "Priya Patel", "student_id": "DEMO-2026-002", "department": "Artificial Intelligence",
+        "experience_level": "Advanced", "experience_years": 2.5,
+        "previous_projects": "Engineered multi-class medical diagnostic classification models with Scikit-learn, PyTorch, and Pandas. Deployed API endpoints for clinical decision support.",
+        "skills": {"Machine Learning": 5, "Data Science": 5, "Python": 4, "Data Analytics": 4, "SQL": 4, "Scikit-learn": 4},
+        "interests": ["Machine Learning & Data Science", "Healthcare & BioInformatics"],
+        "availability": ["Weekday Mornings", "Weekday Evenings", "Flexible / Anytime"],
+        "roles": [("Data & ML Engineer", 1), ("Project Coordinator & Researcher", 2)]
+    },
+    {
+        "email": "student3@college.edu", "full_name": "Marcus Brooks", "student_id": "DEMO-2026-003", "department": "Software Engineering",
+        "experience_level": "Intermediate", "experience_years": 2.0,
+        "previous_projects": "Constructed single-page web applications with React, TypeScript, and modern CSS. Integrated state management and accessible UI components.",
+        "skills": {"React": 4, "JavaScript": 4, "HTML/CSS": 4, "UI/UX": 3, "TypeScript": 3, "Git/GitHub": 3},
+        "interests": ["Web Application Development", "FinTech & Blockchain"],
+        "availability": ["Weekday Mornings", "Weekday Evenings"],
+        "roles": [("Frontend Developer", 1), ("UI/UX Designer", 2)]
+    },
+    {
+        "email": "student4@college.edu", "full_name": "Elena Rostova", "student_id": "DEMO-2026-004", "department": "Design & Computing",
+        "experience_level": "Intermediate", "experience_years": 2.0,
+        "previous_projects": "Designed user journeys, wireframes, and design systems in Figma. Created responsive HTML/CSS component libraries achieving WCAG AA accessibility standards.",
+        "skills": {"UI/UX": 5, "HTML/CSS": 4, "React": 3, "JavaScript": 3, "Figma/UI Design": 5},
+        "interests": ["Web Application Development", "Healthcare & BioInformatics"],
+        "availability": ["Weekday Afternoons", "Weekday Evenings", "Weekend Mornings"],
+        "roles": [("UI/UX Designer", 1), ("Frontend Developer", 2)]
+    },
+    {
+        "email": "student5@college.edu", "full_name": "Vikram Sharma", "student_id": "DEMO-2026-005", "department": "Information Technology",
+        "experience_level": "Intermediate", "experience_years": 2.0,
+        "previous_projects": "Developed robust banking transaction services in Java Spring Boot and Python. Managed relational database migrations and connection pool tuning.",
+        "skills": {"Java": 4, "Backend Development": 4, "SQL": 4, "Cloud Computing": 3, "Git/GitHub": 3, "Linux": 3},
+        "interests": ["Cloud Native & Distributed Systems", "FinTech & Blockchain"],
+        "availability": ["Weekday Evenings", "Weekend Mornings"],
+        "roles": [("Backend Developer", 1), ("QA / Testing Engineer", 2)]
+    },
+    {
+        "email": "student6@college.edu", "full_name": "Aisha Khan", "student_id": "DEMO-2026-006", "department": "Data Science",
+        "experience_level": "Intermediate", "experience_years": 2.0,
+        "previous_projects": "Built ETL telemetry processing pipelines and SQL analytical data warehouses. Generated automated weekly KPI dashboards and cohort churn forecasts.",
+        "skills": {"Data Analytics": 5, "SQL": 4, "Python": 4, "Data Science": 4, "Pandas": 4, "Machine Learning": 3},
+        "interests": ["Machine Learning & Data Science", "Cloud Native & Distributed Systems"],
+        "availability": ["Weekday Mornings", "Weekday Afternoons", "Weekend Mornings"],
+        "roles": [("Data & ML Engineer", 1), ("Project Coordinator & Researcher", 2)]
+    },
+    {
+        "email": "student7@college.edu", "full_name": "Lucas Silva", "student_id": "DEMO-2026-007", "department": "Computer Science",
+        "experience_level": "Intermediate", "experience_years": 1.5,
+        "previous_projects": "Built responsive frontends with React, Vue.js, and Tailwind CSS. Implemented search auto-completion, client-side caching, and pagination.",
+        "skills": {"React": 4, "JavaScript": 4, "HTML/CSS": 4, "UI/UX": 3, "Vue.js": 3, "Git/GitHub": 3},
+        "interests": ["Web Application Development", "FinTech & Blockchain"],
+        "availability": ["Weekday Mornings", "Weekday Evenings"],
+        "roles": [("Frontend Developer", 1), ("UI/UX Designer", 2)]
+    },
+    {
+        "email": "student8@college.edu", "full_name": "Sophia Martinez", "student_id": "DEMO-2026-008", "department": "Software Engineering",
+        "experience_level": "Intermediate", "experience_years": 2.0,
+        "previous_projects": "Authored comprehensive Pytest and Cypress integration test suites. Implemented automated GitHub Actions CI/CD validation pipelines.",
+        "skills": {"Git/GitHub": 4, "Python": 3, "Java": 3, "SQL": 3, "Backend Development": 3, "Linux": 3},
+        "interests": ["Cloud Native & Distributed Systems", "Cybersecurity & Privacy"],
+        "availability": ["Weekday Afternoons", "Weekday Evenings"],
+        "roles": [("QA / Testing Engineer", 1), ("Backend Developer", 2)]
+    },
+    {
+        "email": "student9@college.edu", "full_name": "Devon Taylor", "student_id": "DEMO-2026-009", "department": "Information Technology",
+        "experience_level": "Intermediate", "experience_years": 2.0,
+        "previous_projects": "Provisioned multi-region cloud resources using Terraform and AWS. Configured Docker container runtimes, reverse proxies, and SSL termination.",
+        "skills": {"Cloud Computing": 4, "Docker": 4, "Linux": 4, "Backend Development": 3, "Python": 3, "AWS": 4},
+        "interests": ["Cloud Native & Distributed Systems", "Cybersecurity & Privacy"],
+        "availability": ["Weekday Evenings", "Weekend Afternoons", "Flexible / Anytime"],
+        "roles": [("Backend Developer", 1), ("QA / Testing Engineer", 2)]
+    },
+    {
+        "email": "student10@college.edu", "full_name": "Zack Williams", "student_id": "DEMO-2026-010", "department": "Human-Centered Computing",
+        "experience_level": "Intermediate", "experience_years": 1.5,
+        "previous_projects": "Led agile sprints, project timelines, and technical milestone reporting. Conducted user interview sessions and translated feedback into Jira user stories.",
+        "skills": {"Git/GitHub": 4, "UI/UX": 3, "Data Analytics": 3, "Python": 3, "SQL": 3},
+        "interests": ["Web Application Development", "Machine Learning & Data Science"],
+        "availability": ["Weekday Mornings", "Weekday Afternoons"],
+        "roles": [("Project Coordinator & Researcher", 1), ("UI/UX Designer", 2)]
+    },
+    {
+        "email": "student11@college.edu", "full_name": "Ananya Deshmukh", "student_id": "DEMO-2026-011", "department": "Artificial Intelligence",
+        "experience_level": "Advanced", "experience_years": 2.5,
+        "previous_projects": "Trained unsupervised clustering and topic modeling algorithms on educational corpora. Designed evaluation benchmarks using Silhouette coefficient and Davies-Bouldin metrics.",
+        "skills": {"Machine Learning": 5, "Python": 5, "Data Science": 4, "Scikit-learn": 5, "Data Analytics": 4, "SQL": 4},
+        "interests": ["Machine Learning & Data Science", "Healthcare & BioInformatics"],
+        "availability": ["Weekday Evenings", "Weekend Mornings", "Flexible / Anytime"],
+        "roles": [("Data & ML Engineer", 1), ("Project Coordinator & Researcher", 2)]
+    },
+    {
+        "email": "student12@college.edu", "full_name": "Daniel Kim", "student_id": "DEMO-2026-012", "department": "Computer Science",
+        "experience_level": "Intermediate", "experience_years": 2.0,
+        "previous_projects": "Created full-stack educational quiz platform with Flask backend and React frontend. Designed relational schemas with foreign key constraints in MySQL.",
+        "skills": {"Backend Development": 4, "React": 4, "JavaScript": 4, "Python": 4, "SQL": 3, "HTML/CSS": 3},
+        "interests": ["Web Application Development", "Machine Learning & Data Science"],
+        "availability": ["Weekday Mornings", "Weekday Evenings"],
+        "roles": [("Backend Developer", 1), ("Frontend Developer", 2)]
+    },
+    {
+        "email": "student13@college.edu", "full_name": "Olivia Brown", "student_id": "DEMO-2026-013", "department": "Design & Computing",
+        "experience_level": "Intermediate", "experience_years": 1.5,
+        "previous_projects": "Engineered responsive web applications and interactive SVG graphics. Conducted heuristic evaluations and accessibility audits.",
+        "skills": {"UI/UX": 5, "HTML/CSS": 4, "JavaScript": 3, "React": 3, "Figma/UI Design": 4},
+        "interests": ["Web Application Development", "Healthcare & BioInformatics"],
+        "availability": ["Weekday Afternoons", "Weekday Evenings", "Weekend Afternoons"],
+        "roles": [("UI/UX Designer", 1), ("Frontend Developer", 2)]
+    },
+    {
+        "email": "student14@college.edu", "full_name": "Arjun Nair", "student_id": "DEMO-2026-014", "department": "Data Science",
+        "experience_level": "Intermediate", "experience_years": 2.0,
+        "previous_projects": "Constructed interactive analytical dashboards using Chart.js, Pandas, and Flask. Implemented real-time anomaly detection queries on IoT telemetry.",
+        "skills": {"Data Analytics": 5, "SQL": 4, "Python": 4, "Cloud Computing": 3, "Data Science": 3, "Docker": 3},
+        "interests": ["Cloud Native & Distributed Systems", "Machine Learning & Data Science"],
+        "availability": ["Weekday Mornings", "Weekday Evenings", "Weekend Mornings"],
+        "roles": [("Data & ML Engineer", 1), ("Backend Developer", 2)]
+    },
+    {
+        "email": "student15@college.edu", "full_name": "Hannah Schmidt", "student_id": "DEMO-2026-015", "department": "Software Engineering",
+        "experience_level": "Beginner", "experience_years": 1.0,
+        "previous_projects": "Built personal portfolio sites and interactive forms in React and CSS Grid. Participated in university hackathon building frontend for food-delivery app.",
+        "skills": {"HTML/CSS": 4, "JavaScript": 3, "React": 3, "UI/UX": 3, "Git/GitHub": 3},
+        "interests": ["Web Application Development", "FinTech & Blockchain"],
+        "availability": ["Weekday Mornings", "Weekday Afternoons"],
+        "roles": [("Frontend Developer", 1), ("UI/UX Designer", 2)]
+    },
+    {
+        "email": "student16@college.edu", "full_name": "Kevin Tan", "student_id": "DEMO-2026-016", "department": "Computer Science",
+        "experience_level": "Intermediate", "experience_years": 2.0,
+        "previous_projects": "Implemented multi-threaded network sockets and database connection pooling in Java. Created RESTful service consumers in Python.",
+        "skills": {"Java": 4, "Backend Development": 4, "Python": 4, "SQL": 4, "Git/GitHub": 3, "Cloud Computing": 3},
+        "interests": ["Cloud Native & Distributed Systems", "FinTech & Blockchain"],
+        "availability": ["Weekday Evenings", "Weekend Mornings", "Weekend Afternoons"],
+        "roles": [("Backend Developer", 1), ("QA / Testing Engineer", 2)]
+    }
+]
+
+# All Student Cohorts
+STUDENTS_DATA = DEMO_EVALUATION_STUDENTS + [
     # 1 - 4: Strong Backend Specialists
     {
         "email": "alex.chen@college.edu", "full_name": "Alex Chen", "student_id": "STU2026-001", "department": "Computer Science",
@@ -328,6 +500,75 @@ STUDENTS_DATA = [
 ]
 
 PROJECTS_DATA = [
+    {
+        "title": "AI Tutor Platform: Personalized Adaptive Learning",
+        "domain": "Machine Learning & Data Science",
+        "description": "Develop an intelligent adaptive learning assistant that analyzes student coding submissions, predicts learning bottlenecks, and provides customized instructional feedback using Scikit-learn and an interactive web interface.",
+        "desired_team_size": 4,
+        "min_team_size": 3,
+        "max_team_size": 5,
+        "experience_level_required": "Intermediate",
+        "status": "Open",
+        "required_skills": [
+            {"skill_name": "Machine Learning", "min_proficiency": 3, "is_mandatory": True, "priority_weight": 1.3},
+            {"skill_name": "Python", "min_proficiency": 3, "is_mandatory": True, "priority_weight": 1.2},
+            {"skill_name": "React", "min_proficiency": 3, "is_mandatory": True, "priority_weight": 1.1},
+            {"skill_name": "SQL", "min_proficiency": 2, "is_mandatory": False, "priority_weight": 1.0},
+            {"skill_name": "UI/UX", "min_proficiency": 2, "is_mandatory": False, "priority_weight": 1.0}
+        ],
+        "required_roles": [
+            {"role_name": "Data & ML Engineer", "count": 1},
+            {"role_name": "Backend Developer", "count": 1},
+            {"role_name": "Frontend Developer", "count": 1},
+            {"role_name": "Project Coordinator & Researcher", "count": 1}
+        ]
+    },
+    {
+        "title": "Web Application Development: Enterprise Collaborative Workspace",
+        "domain": "Web Application Development",
+        "description": "Architect a modern multi-tenant web application featuring real-time markdown documentation, kanban task boards, role-based access management, and automated RESTful microservice communication.",
+        "desired_team_size": 4,
+        "min_team_size": 3,
+        "max_team_size": 5,
+        "experience_level_required": "Intermediate",
+        "status": "Open",
+        "required_skills": [
+            {"skill_name": "React", "min_proficiency": 3, "is_mandatory": True, "priority_weight": 1.2},
+            {"skill_name": "Backend Development", "min_proficiency": 3, "is_mandatory": True, "priority_weight": 1.2},
+            {"skill_name": "JavaScript", "min_proficiency": 3, "is_mandatory": True, "priority_weight": 1.1},
+            {"skill_name": "HTML/CSS", "min_proficiency": 3, "is_mandatory": True, "priority_weight": 1.0},
+            {"skill_name": "UI/UX", "min_proficiency": 2, "is_mandatory": False, "priority_weight": 1.0}
+        ],
+        "required_roles": [
+            {"role_name": "Frontend Developer", "count": 1},
+            {"role_name": "Backend Developer", "count": 1},
+            {"role_name": "UI/UX Designer", "count": 1},
+            {"role_name": "QA / Testing Engineer", "count": 1}
+        ]
+    },
+    {
+        "title": "Data Analytics Dashboard: Real-Time Operational Telemetry",
+        "domain": "Cloud Native & Distributed Systems",
+        "description": "Build an enterprise analytics command center aggregating streaming service telemetry, cost allocation metrics, and failure anomaly indicators with high-performance time-series queries and responsive visual charts.",
+        "desired_team_size": 4,
+        "min_team_size": 3,
+        "max_team_size": 4,
+        "experience_level_required": "Intermediate",
+        "status": "Open",
+        "required_skills": [
+            {"skill_name": "Data Analytics", "min_proficiency": 3, "is_mandatory": True, "priority_weight": 1.3},
+            {"skill_name": "SQL", "min_proficiency": 3, "is_mandatory": True, "priority_weight": 1.2},
+            {"skill_name": "Python", "min_proficiency": 3, "is_mandatory": True, "priority_weight": 1.1},
+            {"skill_name": "Cloud Computing", "min_proficiency": 2, "is_mandatory": False, "priority_weight": 1.0},
+            {"skill_name": "Data Science", "min_proficiency": 2, "is_mandatory": False, "priority_weight": 1.0}
+        ],
+        "required_roles": [
+            {"role_name": "Data & ML Engineer", "count": 1},
+            {"role_name": "Backend Developer", "count": 1},
+            {"role_name": "UI/UX Designer", "count": 1},
+            {"role_name": "Project Coordinator & Researcher", "count": 1}
+        ]
+    },
     {
         "title": "Intelligent HealthCare Analytics Portal",
         "domain": "Healthcare & BioInformatics",
@@ -574,13 +815,42 @@ def seed_database(session=None):
                         preference_rank=rank
                     ))
         else:
-            # Update existing profile summary
+            # Update existing profile summary and backfill any missing skills/availability
             if u.profile:
                 u.profile.previous_projects_summary = s_data["previous_projects"]
                 u.profile.experience_years = s_data["experience_years"]
                 u.profile.experience_level = s_data["experience_level"]
                 u.profile.department = s_data["department"]
                 u.profile.is_profile_complete = True
+
+                # Backfill skills if empty
+                if not u.profile.skills or len(u.profile.skills) == 0:
+                    for s_name, prof in s_data["skills"].items():
+                        if s_name in skill_map:
+                            db.add(StudentSkill(
+                                profile_id=u.profile.id,
+                                skill_id=skill_map[s_name].id,
+                                proficiency=prof
+                            ))
+
+                # Backfill availability if empty
+                if not u.profile.availability or len(u.profile.availability) == 0:
+                    for slot_name in s_data["availability"]:
+                        if slot_name in slot_map:
+                            db.add(StudentAvailability(
+                                profile_id=u.profile.id,
+                                slot_id=slot_map[slot_name].id
+                            ))
+
+                # Backfill preferred roles if empty
+                if not u.profile.preferred_roles or len(u.profile.preferred_roles) == 0:
+                    for r_name, rank in s_data["roles"]:
+                        if r_name in role_map:
+                            db.add(StudentPreferredRole(
+                                profile_id=u.profile.id,
+                                role_id=role_map[r_name].id,
+                                preference_rank=rank
+                            ))
 
     # 7. Seed Demo Projects
     for p_data in PROJECTS_DATA:

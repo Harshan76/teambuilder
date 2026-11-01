@@ -59,12 +59,41 @@ def profile_edit():
         previous_projects = request.form.get("previous_projects_summary", "")
         collaboration_pref = request.form.get("collaboration_preference", "Flexible / Balanced")
 
-        # Process skills: form inputs named skill_<skill_id> with proficiency
+        # Process skills: supports dynamic JSON payload, selected_skill_id lists, or individual inputs
         skills_input = []
-        for s in catalogs["skills"]:
-            prof_val = request.form.get(f"skill_{s.id}")
-            if prof_val and int(prof_val) > 0:
-                skills_input.append({"skill_id": s.id, "proficiency": int(prof_val)})
+        skills_json = request.form.get("skills_json")
+        selected_ids = request.form.getlist("selected_skill_id")
+        selected_profs = request.form.getlist("selected_skill_proficiency")
+
+        if skills_json:
+            try:
+                import json
+                parsed_skills = json.loads(skills_json)
+                if isinstance(parsed_skills, list):
+                    for item in parsed_skills:
+                        s_id = item.get("id") or item.get("skill_id")
+                        if s_id:
+                            skills_input.append({
+                                "skill_id": int(s_id),
+                                "proficiency": max(1, min(5, int(item.get("proficiency", 3))))
+                            })
+            except Exception:
+                pass
+
+        if not skills_input and selected_ids:
+            for idx, s_id in enumerate(selected_ids):
+                if s_id and str(s_id).isdigit():
+                    p_val = int(selected_profs[idx]) if idx < len(selected_profs) and str(selected_profs[idx]).isdigit() else 3
+                    skills_input.append({
+                        "skill_id": int(s_id),
+                        "proficiency": max(1, min(5, p_val))
+                    })
+
+        if not skills_input:
+            for s in catalogs["skills"]:
+                prof_val = request.form.get(f"skill_{s.id}")
+                if prof_val and str(prof_val).isdigit() and int(prof_val) > 0:
+                    skills_input.append({"skill_id": s.id, "proficiency": int(prof_val)})
 
         # Process interests: multiselect checkboxes named interest_ids
         interest_ids = request.form.getlist("interest_ids")

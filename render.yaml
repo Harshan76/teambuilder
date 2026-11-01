@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: ai-group-project-team-builder
+    runtime: python
+    plan: free
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "gunicorn \"app:create_app()\" -c gunicorn.conf.py"
+    healthCheckPath: /health
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.10.6
+      - key: SECRET_KEY
+        generateValue: true
+      - key: AUTO_SEED
+        value: "true"
+      - key: LOG_LEVEL
+        value: "info"
+      - key: WEB_CONCURRENCY
+        value: "2"
+      - key: GUNICORN_THREADS
+        value: "4"
+      - key: GUNICORN_TIMEOUT
+        value: "120"

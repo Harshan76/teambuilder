@@ -83,3 +83,118 @@ def override_role():
     except Exception as e:
         db.rollback()
         return jsonify({"success": False, "error": f"Database error during role override: {str(e)}"}), 500
+
+@api_bp.route("/student/skills", methods=["GET"])
+@login_required
+def get_student_skills():
+    """Returns the full catalog of technical skills and the student's current proficiencies."""
+    from services.auth_service import get_current_user
+    from models.entities import Skill, StudentProfile, StudentSkill
+    user = get_current_user()
+    db = get_db()
+    
+    all_skills = db.query(Skill).order_by(Skill.category.asc(), Skill.name.asc()).all()
+    skills_catalog = [{"id": s.id, "name": s.name, "category": s.category} for s in all_skills]
+    
+    student_skills = []
+    if user and user.profile:
+        for ss in user.profile.skills:
+            student_skills.append({
+                "skill_id": ss.skill_id,
+                "name": ss.skill.name if ss.skill else "",
+                "category": ss.skill.category if ss.skill else "",
+                "proficiency": ss.proficiency
+            })
+            
+    return jsonify({
+        "success": True,
+        "catalog": skills_catalog,
+        "selected_skills": student_skills
+    })
+
+@api_bp.route("/student/skills", methods=["POST"])
+@login_required
+def save_student_skill():
+    """Adds or updates a student technical skill with verified proficiency level."""
+    from services.auth_service import get_current_user
+    from models.entities import Skill, StudentProfile, StudentSkill
+    user = get_current_user()
+    if not user or not user.profile:
+        return jsonify({"success": False, "error": "Student profile not found"}), 404
+
+    data = request.get_json() or {}
+    skill_id = data.get("skill_id")
+    proficiency = data.get("proficiency", 3)
+
+    if not skill_id:
+        return jsonify({"success": False, "error": "skill_id is required"}), 400
+
+    try:
+        skill_id = int(skill_id)
+        proficiency = max(1, min(5, int(proficiency)))
+    except (ValueError, TypeError):
+        return jsonify({"success": False, "error": "Invalid skill_id or proficiency format"}), 400
+
+    db = get_db()
+    skill = db.query(Skill).filter_by(id=skill_id).first()
+    if not skill:
+        return jsonify({"success": False, "error": "Skill not found in catalog"}), 404
+
+    try:
+        existing = db.query(StudentSkill).filter_by(profile_id=user.profile.id, skill_id=skill_id).first()
+        if existing:
+            existing.proficiency = proficiency
+        else:
+            new_ss = StudentSkill(profile_id=user.profile.id, skill_id=skill_id, proficiency=proficiency)
+            db.add(new_ss)
+        
+        # Check completeness
+        from services.student_service import StudentService
+        is_complete, _, _ = StudentService.check_profile_completion(user.profile)
+        user.profile.is_profile_complete = is_complete
+
+        db.commit()
+        return jsonify({
+            "success": True,
+            "message": f"Skill '{skill.name}' saved with proficiency Level {proficiency}.",
+            "skill": {
+                "skill_id": skill.id,
+                "name": skill.name,
+                "category": skill.category,
+                "proficiency": proficiency
+            }
+        })
+    except Exception as e:
+        db.rollback()
+        return jsonify({"success": False, "error": f"Database error saving skill: {str(e)}"}), 500
+
+@api_bp.route("/student/skills/<int:skill_id>", methods=["DELETE"])
+@login_required
+def delete_student_skill(skill_id):
+    """Removes a technical skill from the student's profile."""
+    from services.auth_service import get_current_user
+    from models.entities import StudentSkill
+    user = get_current_user()
+    if not user or not user.profile:
+        return jsonify({"success": False, "error": "Student profile not found"}), 404
+
+    db = get_db()
+    try:
+        existing = db.query(StudentSkill).filter_by(profile_id=user.profile.id, skill_id=skill_id).first()
+        if not existing:
+            return jsonify({"success": False, "error": "Skill not currently assigned to profile"}), 404
+
+        db.delete(existing)
+        
+        from services.student_service import StudentService
+        is_complete, _, _ = StudentService.check_profile_completion(user.profile)
+        user.profile.is_profile_complete = is_complete
+
+        db.commit()
+        return jsonify({
+            "success": True,
+            "message": "Skill removed successfully."
+        })
+    except Exception as e:
+        db.rollback()
+        return jsonify({"success": False, "error": f"Database error deleting skill: {str(e)}"}), 500

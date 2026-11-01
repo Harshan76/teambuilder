@@ -61,37 +61,70 @@
             </div>
 
             <!-- Card 2: Technical Skills & Proficiency -->
-            <div class="card shadow-sm border-0 mb-4">
+            <div class="card shadow-sm border-0 mb-4" id="skills-section-card">
                 <div class="card-header bg-white d-flex justify-content-between align-items-center py-3">
-                    <span class="fw-bold fs-6"><i class="bi bi-code-slash text-primary me-2"></i>2. Technical Skills &amp; Proficiency Levels (1 to 5)</span>
-                    <span class="small text-muted">0 = None &bull; 1 = Novice &bull; 3 = Competent &bull; 5 = Expert</span>
+                    <span class="fw-bold fs-6"><i class="bi bi-code-slash text-primary me-2"></i>2. Technical Skills &amp; Proficiency Levels</span>
+                    <span class="badge bg-primary bg-opacity-10 text-primary border border-primary-subtle px-3 py-2"><span id="skill-counter-badge">0</span> Skills Selected</span>
                 </div>
                 <div class="card-body p-4">
-                    <p class="text-secondary small mb-3">Select your verified proficiency for each technical skill. Skills rated &gt;0 are transformed into continuous/multi-hot vector features for Scikit-learn clustering.</p>
+                    <p class="text-secondary small mb-3">
+                        Select skills from the dropdown, specify your verified proficiency level (1 = Novice to 5 = Expert), and click <strong>Add Skill</strong>. You can adjust proficiencies inline or remove skills at any time.
+                    </p>
 
-                    <div class="row g-3">
-                        {% for s in catalogs.skills %}
-                            {% set curr_prof = selected_skills.get(s.id, 0) %}
-                            {% set cat = s.category %}
-                            <div class="col-12 col-sm-6 col-lg-4">
-                                <div class="p-3 border rounded-3 bg-light d-flex justify-content-between align-items-center {% if 'Frontend' in cat %}skill-cat-frontend{% elif 'Backend' in cat %}skill-cat-backend{% elif 'Data' in cat or 'AI' in cat %}skill-cat-data{% elif 'DevOps' in cat or 'Cloud' in cat %}skill-cat-devops{% else %}skill-cat-design{% endif %}">
-                                    <div>
-                                        <div class="fw-bold small text-dark">{{ s.name }}</div>
-                                        <div class="text-muted" style="font-size: 0.72rem;">{{ s.category }}</div>
-                                    </div>
-                                    <div style="width: 120px;">
-                                        <select class="form-select form-select-sm" name="skill_{{ s.id }}">
-                                            <option value="0" {% if curr_prof == 0 %}selected{% endif %}>0 (None)</option>
-                                            <option value="1" {% if curr_prof == 1 %}selected{% endif %}>1 - Novice</option>
-                                            <option value="2" {% if curr_prof == 2 %}selected{% endif %}>2 - Basic</option>
-                                            <option value="3" {% if curr_prof == 3 %}selected{% endif %}>3 - Good</option>
-                                            <option value="4" {% if curr_prof == 4 %}selected{% endif %}>4 - Strong</option>
-                                            <option value="5" {% if curr_prof == 5 %}selected{% endif %}>5 - Expert</option>
-                                        </select>
-                                    </div>
-                                </div>
+                    <!-- Skill Add Toolbar -->
+                    <div class="p-3 bg-light border rounded-3 mb-4">
+                        <div class="row g-2 align-items-end">
+                            <div class="col-12 col-md-5">
+                                <label for="skill-select-dropdown" class="form-label small fw-semibold text-dark mb-1">
+                                    <i class="bi bi-search me-1 text-primary"></i>Choose Technical Skill *
+                                </label>
+                                <select id="skill-select-dropdown" class="form-select form-select-sm">
+                                    <option value="">-- Choose a Technical Skill to Add --</option>
+                                    {% for s in catalogs.skills %}
+                                        <option value="{{ s.id }}" data-name="{{ s.name }}" data-category="{{ s.category }}">{{ s.name }} ({{ s.category }})</option>
+                                    {% endfor %}
+                                </select>
                             </div>
-                        {% endfor %}
+                            <div class="col-12 col-md-4">
+                                <label for="skill-prof-dropdown" class="form-label small fw-semibold text-dark mb-1">
+                                    <i class="bi bi-bar-chart-steps me-1 text-primary"></i>Proficiency Level
+                                </label>
+                                <select id="skill-prof-dropdown" class="form-select form-select-sm">
+                                    <option value="1">Level 1 - Novice (Beginner / Learner)</option>
+                                    <option value="2">Level 2 - Basic (Working Knowledge)</option>
+                                    <option value="3" selected>Level 3 - Competent / Good</option>
+                                    <option value="4">Level 4 - Strong (Advanced)</option>
+                                    <option value="5">Level 5 - Expert (Specialist / Lead)</option>
+                                </select>
+                            </div>
+                            <div class="col-12 col-md-3">
+                                <button type="button" id="btn-add-skill" class="btn btn-primary btn-sm w-100 fw-semibold">
+                                    <i class="bi bi-plus-circle me-1"></i>Add Skill
+                                </button>
+                            </div>
+                        </div>
+                        <div id="skill-action-feedback" class="small mt-2" style="display: none;"></div>
+                    </div>
+
+                    <!-- Hidden Inputs for Form Submission -->
+                    <input type="hidden" name="skills_json" id="skills-json-payload">
+                    <div id="hidden-skill-inputs"></div>
+
+                    <!-- Selected Skills List / Grid -->
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <label class="form-label fw-bold text-dark small mb-0">
+                            <i class="bi bi-check-circle-fill text-success me-1"></i>Active Technical Skills (<span id="active-skill-count">0</span>)
+                        </label>
+                        <span class="text-muted small" style="font-size: 0.75rem;">At least 1 skill required for team formation</span>
+                    </div>
+
+                    <div id="no-skills-alert" class="alert alert-light border text-center text-muted py-4 small mb-0">
+                        <i class="bi bi-layers text-secondary fs-4 d-block mb-1"></i>
+                        No technical skills added yet. Use the dropdown above to add your primary programming languages, frameworks, or tools.
+                    </div>
+
+                    <div id="selected-skills-grid" class="row g-3" style="display: none;">
+                        <!-- Dynamic Selected Skill Badges rendered by JavaScript -->
                     </div>
                 </div>
             </div>
@@ -149,9 +182,9 @@
                             <p class="text-secondary small mb-3">Rank your preferred project responsibilities:</p>
                             
                             <div class="mb-3">
-                                <label class="form-label small fw-semibold text-primary">1st Choice Role *</label>
-                                <select class="form-select form-select-sm" name="role_rank_1" required>
-                                    <option value="">-- Select 1st Choice --</option>
+                                <label class="form-label small fw-semibold text-primary">1st Choice Role</label>
+                                <select class="form-select form-select-sm" name="role_rank_1">
+                                    <option value="">-- Select 1st Choice (Recommended) --</option>
                                     {% for r in catalogs.roles %}
                                         <option value="{{ r.id }}" {% if selected_roles.get(1) == r.id %}selected{% endif %}>{{ r.name }}</option>
                                     {% endfor %}
@@ -185,11 +218,221 @@
             <!-- Submit Button -->
             <div class="d-flex justify-content-end gap-2 mb-5">
                 <a href="{{ url_for('student.dashboard') }}" class="btn btn-outline-secondary">Cancel</a>
-                <button type="submit" class="btn btn-primary btn-lg px-4 fw-semibold">
+                <button type="submit" id="btn-save-profile" class="btn btn-primary btn-lg px-4 fw-semibold">
                     <i class="bi bi-check2-circle me-1"></i>Save Profile &amp; Verify Completeness
                 </button>
             </div>
         </form>
     </div>
 </div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    // 1. Initial State from Database
+    const initialSkills = [
+        {% for s in catalogs.skills %}
+            {% if s.id in selected_skills and selected_skills[s.id] > 0 %}
+            {
+                id: {{ s.id }},
+                name: {{ s.name|tojson }},
+                category: {{ s.category|tojson }},
+                proficiency: {{ selected_skills[s.id] }}
+            },
+            {% endif %}
+        {% endfor %}
+    ];
+
+    let currentSkills = [...initialSkills];
+
+    // DOM Elements
+    const skillSelect = document.getElementById("skill-select-dropdown");
+    const profSelect = document.getElementById("skill-prof-dropdown");
+    const btnAddSkill = document.getElementById("btn-add-skill");
+    const skillsGrid = document.getElementById("selected-skills-grid");
+    const noSkillsAlert = document.getElementById("no-skills-alert");
+    const activeCountSpan = document.getElementById("active-skill-count");
+    const counterBadge = document.getElementById("skill-counter-badge");
+    const feedbackBox = document.getElementById("skill-action-feedback");
+    const jsonPayloadInput = document.getElementById("skills-json-payload");
+    const hiddenInputsContainer = document.getElementById("hidden-skill-inputs");
+    const profileForm = document.querySelector("form");
+
+    function getCategoryClass(cat) {
+        if (!cat) return "skill-cat-backend";
+        if (cat.includes("Frontend")) return "skill-cat-frontend";
+        if (cat.includes("Backend")) return "skill-cat-backend";
+        if (cat.includes("Data") || cat.includes("AI")) return "skill-cat-data";
+        if (cat.includes("DevOps") || cat.includes("Cloud")) return "skill-cat-devops";
+        return "skill-cat-design";
+    }
+
+    function showFeedback(msg, isSuccess = true) {
+        if (!feedbackBox) return;
+        feedbackBox.style.display = "block";
+        feedbackBox.className = isSuccess ? "small mt-2 text-success fw-semibold" : "small mt-2 text-danger fw-semibold";
+        feedbackBox.innerHTML = `<i class="bi ${isSuccess ? 'bi-check-circle' : 'bi-exclamation-circle'} me-1"></i>${msg}`;
+        setTimeout(() => {
+            if (feedbackBox) feedbackBox.style.display = "none";
+        }, 4000);
+    }
+
+    function syncHiddenInputs() {
+        if (jsonPayloadInput) {
+            jsonPayloadInput.value = JSON.stringify(currentSkills);
+        }
+        if (hiddenInputsContainer) {
+            let html = "";
+            currentSkills.forEach(item => {
+                html += `<input type="hidden" name="selected_skill_id" value="${item.id}">`;
+                html += `<input type="hidden" name="selected_skill_proficiency" value="${item.proficiency}">`;
+                html += `<input type="hidden" name="skill_${item.id}" value="${item.proficiency}">`;
+            });
+            hiddenInputsContainer.innerHTML = html;
+        }
+        if (activeCountSpan) activeCountSpan.textContent = currentSkills.length;
+        if (counterBadge) counterBadge.textContent = currentSkills.length;
+    }
+
+    function renderSkillsGrid() {
+        if (!skillsGrid || !noSkillsAlert) return;
+
+        if (currentSkills.length === 0) {
+            skillsGrid.style.display = "none";
+            skillsGrid.innerHTML = "";
+            noSkillsAlert.style.display = "block";
+            syncHiddenInputs();
+            return;
+        }
+
+        noSkillsAlert.style.display = "none";
+        skillsGrid.style.display = "flex";
+
+        let html = "";
+        currentSkills.forEach((item, index) => {
+            const catClass = getCategoryClass(item.category);
+            html += `
+            <div class="col-12 col-md-6 col-lg-4" id="skill-card-${item.id}">
+                <div class="p-3 border rounded-3 bg-white shadow-sm h-100 d-flex flex-column justify-content-between ${catClass}" style="transition: all 0.2s;">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <div>
+                            <span class="fw-bold text-dark fs-6 d-block">${item.name}</span>
+                            <span class="badge bg-secondary bg-opacity-10 text-secondary border small" style="font-size: 0.7rem;">${item.category}</span>
+                        </div>
+                        <button type="button" class="btn btn-sm btn-outline-danger border-0 p-1 remove-btn" data-id="${item.id}" title="Remove Skill">
+                            <i class="bi bi-trash3 text-danger fs-6"></i>
+                        </button>
+                    </div>
+                    <div class="pt-2 border-top mt-2">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="small text-muted fw-semibold" style="font-size: 0.75rem;">Proficiency:</span>
+                            <div style="width: 120px;">
+                                <select class="form-select form-select-sm prof-change-select" data-id="${item.id}">
+                                    <option value="1" ${item.proficiency === 1 ? 'selected' : ''}>L1 - Novice</option>
+                                    <option value="2" ${item.proficiency === 2 ? 'selected' : ''}>L2 - Basic</option>
+                                    <option value="3" ${item.proficiency === 3 ? 'selected' : ''}>L3 - Competent</option>
+                                    <option value="4" ${item.proficiency === 4 ? 'selected' : ''}>L4 - Strong</option>
+                                    <option value="5" ${item.proficiency === 5 ? 'selected' : ''}>L5 - Expert</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            `;
+        });
+
+        skillsGrid.innerHTML = html;
+
+        // Attach listeners to Remove buttons
+        skillsGrid.querySelectorAll(".remove-btn").forEach(btn => {
+            btn.addEventListener("click", function () {
+                const sId = parseInt(this.getAttribute("data-id"));
+                const removedItem = currentSkills.find(s => s.id === sId);
+                currentSkills = currentSkills.filter(s => s.id !== sId);
+                renderSkillsGrid();
+                if (removedItem) {
+                    showFeedback(`Removed "${removedItem.name}" from your profile.`, true);
+                }
+            });
+        });
+
+        // Attach listeners to Inline Proficiency dropdowns
+        skillsGrid.querySelectorAll(".prof-change-select").forEach(sel => {
+            sel.addEventListener("change", function () {
+                const sId = parseInt(this.getAttribute("data-id"));
+                const newProf = parseInt(this.value);
+                const item = currentSkills.find(s => s.id === sId);
+                if (item) {
+                    item.proficiency = newProf;
+                    syncHiddenInputs();
+                    showFeedback(`Updated "${item.name}" proficiency to Level ${newProf}.`, true);
+                }
+            });
+        });
+
+        syncHiddenInputs();
+    }
+
+    // Add Skill Click Handler
+    if (btnAddSkill) {
+        btnAddSkill.addEventListener("click", function () {
+            const selectedOpt = skillSelect.options[skillSelect.selectedIndex];
+            if (!selectedOpt || !selectedOpt.value) {
+                showFeedback("Please select a technical skill from the dropdown first.", false);
+                skillSelect.focus();
+                return;
+            }
+
+            const skillId = parseInt(selectedOpt.value);
+            const skillName = selectedOpt.getAttribute("data-name") || selectedOpt.textContent.split("(")[0].trim();
+            const skillCategory = selectedOpt.getAttribute("data-category") || "General";
+            const prof = parseInt(profSelect.value) || 3;
+
+            // Check if already in currentSkills (Duplicate Prevention)
+            const existing = currentSkills.find(s => s.id === skillId);
+            if (existing) {
+                existing.proficiency = prof;
+                renderSkillsGrid();
+                showFeedback(`"${skillName}" is already added. Updated proficiency to Level ${prof}.`, true);
+                const el = document.getElementById(`skill-card-${skillId}`);
+                if (el) {
+                    el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                    el.classList.add("border-primary");
+                    setTimeout(() => el.classList.remove("border-primary"), 1500);
+                }
+            } else {
+                currentSkills.push({
+                    id: skillId,
+                    name: skillName,
+                    category: skillCategory,
+                    proficiency: prof
+                });
+                renderSkillsGrid();
+                showFeedback(`Added "${skillName}" (Level ${prof}) to profile!`, true);
+            }
+
+            // Reset select dropdown to default
+            skillSelect.value = "";
+        });
+    }
+
+    // Form Submit Interception for Validation
+    if (profileForm) {
+        profileForm.addEventListener("submit", function (e) {
+            syncHiddenInputs();
+            if (currentSkills.length === 0) {
+                e.preventDefault();
+                showFeedback("At least one technical skill with proficiency is required to save your profile.", false);
+                const section = document.getElementById("skills-section-card");
+                if (section) section.scrollIntoView({ behavior: 'smooth' });
+                return false;
+            }
+            return true;
+        });
+    }
+
+    // Initial Render
+    renderSkillsGrid();
+});
+</script>
 {% endblock %}
