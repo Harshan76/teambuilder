@@ -120,6 +120,122 @@ ROLES_DATA = [
     }
 ]
 
+# Dedicated 8 Demo Student Profiles for Team Generation & Evaluation
+DEMO_8_STUDENTS = [
+    {
+        "email": "demo.student1@college.edu",
+        "full_name": "[DEMO] Maya Lin",
+        "student_id": "DEMO-STU-001",
+        "department": "Computer Science",
+        "experience_level": "Advanced",
+        "experience_years": 2.5,
+        "previous_projects": "Lead developer for collegiate portal frontend. Specialized in React component libraries, state management, and WCAG accessibility standards.",
+        "collaboration_preference": "Collaborative / Team-Oriented",
+        "skills": {"React": 5, "JavaScript": 5, "TypeScript": 4, "HTML/CSS": 5, "UI/UX": 4, "Git/GitHub": 4},
+        "interests": ["Web Application Development", "Healthcare & BioInformatics"],
+        "availability": ["Weekday Mornings", "Weekday Evenings", "Flexible / Anytime"],
+        "roles": [("Frontend Developer", 1), ("UI/UX Designer", 2)]
+    },
+    {
+        "email": "demo.student2@college.edu",
+        "full_name": "[DEMO] Ethan Vance",
+        "student_id": "DEMO-STU-002",
+        "department": "Software Engineering",
+        "experience_level": "Advanced",
+        "experience_years": 3.0,
+        "previous_projects": "Backend architect with deep experience in Python Flask, distributed relational databases, connection pooling, and REST API microservices.",
+        "collaboration_preference": "Focused & Independent Execution",
+        "skills": {"Python": 5, "Backend Development": 5, "SQL": 5, "Flask": 4, "Docker": 4, "Git/GitHub": 4},
+        "interests": ["Cloud Native & Distributed Systems", "FinTech & Blockchain"],
+        "availability": ["Weekday Mornings", "Weekday Evenings", "Weekend Mornings"],
+        "roles": [("Backend Developer", 1), ("QA / Testing Engineer", 2)]
+    },
+    {
+        "email": "demo.student3@college.edu",
+        "full_name": "[DEMO] Riya Sen",
+        "student_id": "DEMO-STU-003",
+        "department": "Artificial Intelligence",
+        "experience_level": "Advanced",
+        "experience_years": 2.5,
+        "previous_projects": "Machine learning researcher focused on predictive models, clustering algorithms, and statistical data pipelines using Scikit-learn and Pandas.",
+        "collaboration_preference": "Research & Experimentation Driven",
+        "skills": {"Machine Learning": 5, "Data Science": 5, "Scikit-learn": 5, "Python": 4, "Pandas": 4, "SQL": 4},
+        "interests": ["Machine Learning & Data Science", "Healthcare & BioInformatics"],
+        "availability": ["Weekday Mornings", "Weekday Evenings", "Flexible / Anytime"],
+        "roles": [("Data & ML Engineer", 1), ("Project Coordinator & Researcher", 2)]
+    },
+    {
+        "email": "demo.student4@college.edu",
+        "full_name": "[DEMO] Carlos Gomez",
+        "student_id": "DEMO-STU-004",
+        "department": "Information Technology",
+        "experience_level": "Intermediate",
+        "experience_years": 2.0,
+        "previous_projects": "Fullstack developer and DevOps enthusiast. Experience configuring Linux servers, Docker containers, CI/CD automated testing, and cloud infrastructure.",
+        "collaboration_preference": "Agile / Cross-Functional Sprints",
+        "skills": {"Docker": 4, "Linux": 4, "Git/GitHub": 5, "Python": 3, "Cloud Computing": 4, "JavaScript": 3},
+        "interests": ["Cloud Native & Distributed Systems", "Cybersecurity & Privacy"],
+        "availability": ["Weekday Mornings", "Weekend Mornings", "Weekend Afternoons"],
+        "roles": [("QA / Testing Engineer", 1), ("Backend Developer", 2)]
+    },
+    {
+        "email": "demo.student5@college.edu",
+        "full_name": "[DEMO] Chloe Bennett",
+        "student_id": "DEMO-STU-005",
+        "department": "Design & Computing",
+        "experience_level": "Intermediate",
+        "experience_years": 2.0,
+        "previous_projects": "Product designer and frontend builder skilled in Figma design systems, wireframing, usability benchmarking, and modern HTML/CSS/React implementations.",
+        "collaboration_preference": "User-Centered & Visual Collaboration",
+        "skills": {"Figma/UI Design": 5, "UI/UX": 5, "HTML/CSS": 4, "React": 4, "JavaScript": 3},
+        "interests": ["Web Application Development", "Internet of Things (IoT)"],
+        "availability": ["Weekday Afternoons", "Weekday Evenings", "Weekend Mornings"],
+        "roles": [("UI/UX Designer", 1), ("Frontend Developer", 2)]
+    },
+    {
+        "email": "demo.student6@college.edu",
+        "full_name": "[DEMO] Tenzin Norbu",
+        "student_id": "DEMO-STU-006",
+        "department": "Information Technology",
+        "experience_level": "Intermediate",
+        "experience_years": 2.0,
+        "previous_projects": "Cloud solutions engineer experienced in Node.js backend development, relational database design, AWS deployment, and secure API gateways.",
+        "collaboration_preference": "Systematic & Structured Milestones",
+        "skills": {"Node.js": 4, "Backend Development": 4, "SQL": 4, "AWS": 4, "Git/GitHub": 4, "Java": 3},
+        "interests": ["FinTech & Blockchain", "Cloud Native & Distributed Systems"],
+        "availability": ["Weekday Mornings", "Weekday Evenings", "Flexible / Anytime"],
+        "roles": [("Backend Developer", 1), ("Project Coordinator & Researcher", 2)]
+    },
+    {
+        "email": "demo.student7@college.edu",
+        "full_name": "[DEMO] Zara Al-Hassan",
+        "student_id": "DEMO-STU-007",
+        "department": "Data Science",
+        "experience_level": "Advanced",
+        "experience_years": 2.5,
+        "previous_projects": "Data science engineer with expertise in data analytics, ETL pipeline construction, time-series telemetry, and machine learning model evaluation.",
+        "collaboration_preference": "Data-Driven & Iterative Optimization",
+        "skills": {"Data Analytics": 5, "SQL": 5, "Python": 4, "Pandas": 5, "Machine Learning": 4, "Data Science": 4},
+        "interests": ["Machine Learning & Data Science", "FinTech & Blockchain"],
+        "availability": ["Weekday Mornings", "Weekday Evenings", "Weekend Mornings"],
+        "roles": [("Data & ML Engineer", 1), ("Frontend Developer", 2)]
+    },
+    {
+        "email": "demo.student8@college.edu",
+        "full_name": "[DEMO] Liam O'Connor",
+        "student_id": "DEMO-STU-008",
+        "department": "Software Engineering",
+        "experience_level": "Intermediate",
+        "experience_years": 2.0,
+        "previous_projects": "Quality assurance engineer and agile coordinator. Experienced in unit/integration testing suites with Pytest and Jest, technical specification documentation, and sprint tracking.",
+        "collaboration_preference": "Continuous Integration & Team Sync",
+        "skills": {"Git/GitHub": 5, "Python": 4, "JavaScript": 4, "Linux": 3, "SQL": 3, "Vue.js": 3},
+        "interests": ["Web Application Development", "Cybersecurity & Privacy"],
+        "availability": ["Weekday Mornings", "Weekday Evenings", "Weekend Afternoons"],
+        "roles": [("QA / Testing Engineer", 1), ("Project Coordinator & Researcher", 2)]
+    }
+]
+
 # Demonstration & Evaluation Student Cohort (16 Diverse Accounts)
 DEMO_EVALUATION_STUDENTS = [
     {
@@ -936,6 +1052,179 @@ def seed_database(session=None):
 
     db.commit()
     print("Database seeding completed successfully.")
+
+
+def seed_8_demo_students(session=None):
+    """
+    Populates or updates the 8 dedicated demonstration student profiles and demo showcase project.
+    Completely idempotent, non-destructive, and safely preserves existing users and projects.
+    """
+    db = session or get_db()
+
+    # 1. Ensure reference master catalogs
+    catalogs = ensure_master_catalogs(session=db)
+    skill_map = catalogs["skill_map"]
+    interest_map = catalogs["interest_map"]
+    slot_map = catalogs["slot_map"]
+    role_map = catalogs["role_map"]
+
+    # 2. Ensure faculty demonstration user
+    faculty_user = db.query(User).filter_by(email="faculty@college.edu").first()
+    if not faculty_user:
+        faculty_user = User(
+            email="faculty@college.edu",
+            full_name="Dr. Sarah Mitchell",
+            role="faculty"
+        )
+        faculty_user.set_password("Faculty@123")
+        db.add(faculty_user)
+        db.flush()
+
+    # 3. Seed 8 Demo Students
+    from services.student_service import StudentService
+    seeded_students = []
+
+    for s_data in DEMO_8_STUDENTS:
+        u = db.query(User).filter_by(email=s_data["email"]).first()
+        if not u:
+            u = User(
+                email=s_data["email"],
+                full_name=s_data["full_name"],
+                role="student"
+            )
+            u.set_password("Student@123")
+            db.add(u)
+            db.flush()
+        else:
+            u.full_name = s_data["full_name"]
+            u.role = "student"
+
+        profile = u.profile
+        if not profile:
+            profile = StudentProfile(
+                user_id=u.id,
+                student_id=s_data["student_id"],
+                department=s_data["department"],
+                experience_level=s_data["experience_level"],
+                experience_years=s_data["experience_years"],
+                previous_projects_summary=s_data["previous_projects"],
+                collaboration_preference=s_data["collaboration_preference"],
+                is_profile_complete=True
+            )
+            db.add(profile)
+            db.flush()
+        else:
+            profile.student_id = s_data["student_id"]
+            profile.department = s_data["department"]
+            profile.experience_level = s_data["experience_level"]
+            profile.experience_years = s_data["experience_years"]
+            profile.previous_projects_summary = s_data["previous_projects"]
+            profile.collaboration_preference = s_data["collaboration_preference"]
+
+        # Add Skills
+        db.query(StudentSkill).filter_by(profile_id=profile.id).delete()
+        db.flush()
+        for s_name, prof in s_data["skills"].items():
+            if s_name in skill_map:
+                db.add(StudentSkill(
+                    profile_id=profile.id,
+                    skill_id=skill_map[s_name].id,
+                    proficiency=prof
+                ))
+
+        # Add Interests
+        db.query(StudentInterest).filter_by(profile_id=profile.id).delete()
+        db.flush()
+        for i_name in s_data["interests"]:
+            if i_name in interest_map:
+                db.add(StudentInterest(
+                    profile_id=profile.id,
+                    interest_id=interest_map[i_name].id
+                ))
+
+        # Add Availability
+        db.query(StudentAvailability).filter_by(profile_id=profile.id).delete()
+        db.flush()
+        for slot_name in s_data["availability"]:
+            if slot_name in slot_map:
+                db.add(StudentAvailability(
+                    profile_id=profile.id,
+                    slot_id=slot_map[slot_name].id
+                ))
+
+        # Add Roles
+        db.query(StudentPreferredRole).filter_by(profile_id=profile.id).delete()
+        db.flush()
+        for r_name, rank in s_data["roles"]:
+            if r_name in role_map:
+                db.add(StudentPreferredRole(
+                    profile_id=profile.id,
+                    role_id=role_map[r_name].id,
+                    preference_rank=rank
+                ))
+
+        # Recalculate Completeness
+        db.flush()
+        is_complete, _, _ = StudentService.check_profile_completion(profile)
+        profile.is_profile_complete = is_complete
+        seeded_students.append(profile)
+
+    # 4. Ensure dedicated demonstration showcase project
+    demo_proj_title = "[DEMO] AI Multi-Agent Collaboration Hub"
+    demo_proj = db.query(Project).filter_by(title=demo_proj_title).first()
+    if not demo_proj:
+        demo_proj = Project(
+            title=demo_proj_title,
+            domain="Machine Learning & Data Science",
+            description="Capstone evaluation project for AI Group Project Team Builder. Benchmarks rule-based heuristic scoring against Scikit-Learn KMeans clustering across 8 demonstration student profiles.",
+            desired_team_size=4,
+            min_team_size=3,
+            max_team_size=5,
+            experience_level_required="Intermediate",
+            status="Open",
+            created_by=faculty_user.id
+        )
+        db.add(demo_proj)
+        db.flush()
+
+        req_skills_data = [
+            {"skill_name": "Python", "min_proficiency": 3, "is_mandatory": True, "priority_weight": 1.3},
+            {"skill_name": "React", "min_proficiency": 3, "is_mandatory": True, "priority_weight": 1.2},
+            {"skill_name": "Machine Learning", "min_proficiency": 3, "is_mandatory": True, "priority_weight": 1.2},
+            {"skill_name": "SQL", "min_proficiency": 2, "is_mandatory": False, "priority_weight": 1.0}
+        ]
+        for sk in req_skills_data:
+            if sk["skill_name"] in skill_map:
+                db.add(ProjectRequiredSkill(
+                    project_id=demo_proj.id,
+                    skill_id=skill_map[sk["skill_name"]].id,
+                    min_proficiency=sk["min_proficiency"],
+                    is_mandatory=sk["is_mandatory"],
+                    priority_weight=sk["priority_weight"]
+                ))
+
+        req_roles_data = [
+            {"role_name": "Data & ML Engineer", "count": 1},
+            {"role_name": "Backend Developer", "count": 1},
+            {"role_name": "Frontend Developer", "count": 1},
+            {"role_name": "QA / Testing Engineer", "count": 1}
+        ]
+        for rl in req_roles_data:
+            if rl["role_name"] in role_map:
+                db.add(ProjectRequiredRole(
+                    project_id=demo_proj.id,
+                    role_id=role_map[rl["role_name"]].id,
+                    count_needed=rl["count"]
+                ))
+    else:
+        demo_proj.desired_team_size = 4
+        demo_proj.min_team_size = 3
+        demo_proj.max_team_size = 5
+        demo_proj.status = "Open"
+
+    db.commit()
+    print(f"Successfully seeded {len(seeded_students)} demo students and demo project '{demo_proj.title}'.")
+    return seeded_students, demo_proj
 
 if __name__ == "__main__":
     db_manager.init_db()

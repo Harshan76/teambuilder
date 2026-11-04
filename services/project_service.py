@@ -155,6 +155,12 @@ class ProjectService:
             raise ValueError(f"Project #{project_id} not found.")
 
         all_profiles = db.query(StudentProfile).all()
+        # If this is specifically a demonstration showcase project, scope to the 8 demo student profiles
+        if project and project.title and project.title.startswith("[DEMO]"):
+            demo_subset = [p for p in all_profiles if p.student_id and p.student_id.startswith("DEMO-STU-")]
+            if demo_subset:
+                all_profiles = demo_subset
+
         eligible = []
         ineligible = []
 
