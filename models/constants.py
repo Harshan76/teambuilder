@@ -36,3 +36,10 @@ PROFICIENCY_LEVELS = [
     {"level": 4, "code": "L4", "title": "Strong", "description": "Strong / Advanced (Substantial builds)"},
     {"level": 5, "code": "L5", "title": "Expert", "description": "Expert / Lead (Specialist / Internship)"}
 ]
+
+DEMO_PROJECT_TITLES = [
+    "AI-Powered Student Performance Prediction",
+    "Smart Campus Management System",
+    "AI-Powered Resume and Skill Gap Analyzer",
+    "[DEMO] AI Multi-Agent Collaboration Hub"
+]

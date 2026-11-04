@@ -795,6 +795,87 @@ PROJECTS_DATA = [
     }
 ]
 
+# 3 Realistic Academic Demonstration Projects matching the 8 Demo Students
+DEMO_3_PROJECTS = [
+    {
+        "title": "AI-Powered Student Performance Prediction",
+        "domain": "Machine Learning & Data Science",
+        "description": "Develop a system that analyzes student academic performance, attendance and learning patterns to identify students who may need academic support using predictive modeling, statistical feature analysis, and automated performance tracking dashboards.",
+        "desired_team_size": 4,
+        "min_team_size": 3,
+        "max_team_size": 5,
+        "experience_level_required": "Intermediate",
+        "status": "Open",
+        "required_skills": [
+            {"skill_name": "Python", "min_proficiency": 3, "is_mandatory": True, "priority_weight": 1.3},
+            {"skill_name": "Machine Learning", "min_proficiency": 3, "is_mandatory": True, "priority_weight": 1.3},
+            {"skill_name": "Pandas", "min_proficiency": 3, "is_mandatory": True, "priority_weight": 1.2},
+            {"skill_name": "Scikit-learn", "min_proficiency": 3, "is_mandatory": True, "priority_weight": 1.2},
+            {"skill_name": "SQL", "min_proficiency": 3, "is_mandatory": True, "priority_weight": 1.1},
+            {"skill_name": "Data Analytics", "min_proficiency": 2, "is_mandatory": False, "priority_weight": 1.0},
+            {"skill_name": "Git/GitHub", "min_proficiency": 2, "is_mandatory": False, "priority_weight": 0.9}
+        ],
+        "required_roles": [
+            {"role_name": "Data & ML Engineer", "count": 1},
+            {"role_name": "Backend Developer", "count": 1},
+            {"role_name": "Project Coordinator & Researcher", "count": 1},
+            {"role_name": "QA / Testing Engineer", "count": 1}
+        ]
+    },
+    {
+        "title": "Smart Campus Management System",
+        "domain": "Web Application Development",
+        "description": "Build a web-based platform for managing campus activities, student information, announcements and facility-related requests featuring responsive web portals, robust RESTful APIs, and relational database management.",
+        "desired_team_size": 4,
+        "min_team_size": 3,
+        "max_team_size": 5,
+        "experience_level_required": "Intermediate",
+        "status": "Open",
+        "required_skills": [
+            {"skill_name": "HTML/CSS", "min_proficiency": 3, "is_mandatory": True, "priority_weight": 1.2},
+            {"skill_name": "JavaScript", "min_proficiency": 3, "is_mandatory": True, "priority_weight": 1.2},
+            {"skill_name": "React", "min_proficiency": 3, "is_mandatory": True, "priority_weight": 1.2},
+            {"skill_name": "Python", "min_proficiency": 3, "is_mandatory": True, "priority_weight": 1.2},
+            {"skill_name": "Flask", "min_proficiency": 2, "is_mandatory": False, "priority_weight": 1.1},
+            {"skill_name": "SQL", "min_proficiency": 3, "is_mandatory": True, "priority_weight": 1.1},
+            {"skill_name": "Backend Development", "min_proficiency": 3, "is_mandatory": True, "priority_weight": 1.2},
+            {"skill_name": "UI/UX", "min_proficiency": 2, "is_mandatory": False, "priority_weight": 1.0}
+        ],
+        "required_roles": [
+            {"role_name": "Frontend Developer", "count": 1},
+            {"role_name": "Backend Developer", "count": 1},
+            {"role_name": "UI/UX Designer", "count": 1},
+            {"role_name": "QA / Testing Engineer", "count": 1}
+        ]
+    },
+    {
+        "title": "AI-Powered Resume and Skill Gap Analyzer",
+        "domain": "Machine Learning & Data Science",
+        "description": "Develop a platform that analyzes student resumes, identifies technical skills and compares them with job requirements to suggest missing skills and learning recommendations using machine learning vector extraction, fullstack web interfaces, and relational profile stores.",
+        "desired_team_size": 4,
+        "min_team_size": 3,
+        "max_team_size": 5,
+        "experience_level_required": "Intermediate",
+        "status": "Open",
+        "required_skills": [
+            {"skill_name": "Python", "min_proficiency": 3, "is_mandatory": True, "priority_weight": 1.3},
+            {"skill_name": "Machine Learning", "min_proficiency": 3, "is_mandatory": True, "priority_weight": 1.3},
+            {"skill_name": "Scikit-learn", "min_proficiency": 3, "is_mandatory": True, "priority_weight": 1.2},
+            {"skill_name": "HTML/CSS", "min_proficiency": 2, "is_mandatory": True, "priority_weight": 1.0},
+            {"skill_name": "JavaScript", "min_proficiency": 2, "is_mandatory": True, "priority_weight": 1.0},
+            {"skill_name": "SQL", "min_proficiency": 3, "is_mandatory": True, "priority_weight": 1.1},
+            {"skill_name": "Data Science", "min_proficiency": 2, "is_mandatory": False, "priority_weight": 1.0},
+            {"skill_name": "Git/GitHub", "min_proficiency": 2, "is_mandatory": False, "priority_weight": 0.9}
+        ],
+        "required_roles": [
+            {"role_name": "Data & ML Engineer", "count": 1},
+            {"role_name": "Backend Developer", "count": 1},
+            {"role_name": "Frontend Developer", "count": 1},
+            {"role_name": "Project Coordinator & Researcher", "count": 1}
+        ]
+    }
+]
+
 def ensure_master_catalogs(session=None):
     """
     Ensures that reference master catalogs (Skills, Interests, Availability Slots, Roles)
@@ -1223,8 +1304,93 @@ def seed_8_demo_students(session=None):
         demo_proj.status = "Open"
 
     db.commit()
+    seed_3_demo_projects(session=db)
     print(f"Successfully seeded {len(seeded_students)} demo students and demo project '{demo_proj.title}'.")
     return seeded_students, demo_proj
+
+
+def seed_3_demo_projects(session=None):
+    """
+    Populates or updates the 3 realistic academic demonstration projects:
+    1. AI-Powered Student Performance Prediction
+    2. Smart Campus Management System
+    3. AI-Powered Resume and Skill Gap Analyzer
+
+    Completely idempotent, non-destructive, and links required skills & roles.
+    """
+    db = session or get_db()
+    catalogs = ensure_master_catalogs(session=db)
+    skill_map = catalogs["skill_map"]
+    role_map = catalogs["role_map"]
+
+    # Ensure faculty owner exists
+    faculty_user = db.query(User).filter_by(email="faculty@college.edu").first()
+    if not faculty_user:
+        faculty_user = User(
+            email="faculty@college.edu",
+            full_name="Dr. Sarah Mitchell",
+            role="faculty"
+        )
+        faculty_user.set_password("Faculty@123")
+        db.add(faculty_user)
+        db.flush()
+
+    seeded_projects = []
+
+    for p_data in DEMO_3_PROJECTS:
+        proj = db.query(Project).filter_by(title=p_data["title"]).first()
+        if not proj:
+            proj = Project(
+                title=p_data["title"],
+                domain=p_data["domain"],
+                description=p_data["description"],
+                desired_team_size=p_data["desired_team_size"],
+                min_team_size=p_data["min_team_size"],
+                max_team_size=p_data["max_team_size"],
+                experience_level_required=p_data["experience_level_required"],
+                status=p_data["status"],
+                created_by=faculty_user.id
+            )
+            db.add(proj)
+            db.flush()
+        else:
+            proj.domain = p_data["domain"]
+            proj.description = p_data["description"]
+            proj.desired_team_size = p_data["desired_team_size"]
+            proj.min_team_size = p_data["min_team_size"]
+            proj.max_team_size = p_data["max_team_size"]
+            proj.experience_level_required = p_data["experience_level_required"]
+            proj.status = p_data["status"]
+
+        # Clear and update required skills
+        db.query(ProjectRequiredSkill).filter_by(project_id=proj.id).delete()
+        db.flush()
+        for sk in p_data["required_skills"]:
+            if sk["skill_name"] in skill_map:
+                db.add(ProjectRequiredSkill(
+                    project_id=proj.id,
+                    skill_id=skill_map[sk["skill_name"]].id,
+                    min_proficiency=sk["min_proficiency"],
+                    is_mandatory=sk["is_mandatory"],
+                    priority_weight=sk["priority_weight"]
+                ))
+
+        # Clear and update required roles
+        db.query(ProjectRequiredRole).filter_by(project_id=proj.id).delete()
+        db.flush()
+        for rl in p_data["required_roles"]:
+            if rl["role_name"] in role_map:
+                db.add(ProjectRequiredRole(
+                    project_id=proj.id,
+                    role_id=role_map[rl["role_name"]].id,
+                    count_needed=rl["count"]
+                ))
+
+        seeded_projects.append(proj)
+
+    db.commit()
+    print(f"Successfully seeded/updated {len(seeded_projects)} demonstration projects.")
+    return seeded_projects
 
 if __name__ == "__main__":
     db_manager.init_db()

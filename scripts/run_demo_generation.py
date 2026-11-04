@@ -58,11 +58,11 @@ def main():
     base_run = TeamGenerationRun(
         project_id=proj.id,
         method="baseline",
-        algorithm_type="Rule-Based Weighted Scoring",
         weights_json=str(RuleBasedTeamEngine.DEFAULT_WEIGHTS),
-        parameters_json="{}",
-        total_students=len(eligible),
-        formed_teams_count=len(base_res["teams"]),
+        random_seed=42,
+        n_teams=len(base_res["teams"]),
+        n_students_assigned=len(eligible),
+        n_students_unassigned=0,
         runtime_seconds=base_res["runtime_seconds"]
     )
     db.add(base_run)
@@ -74,12 +74,13 @@ def main():
             project_id=proj.id,
             run_id=base_run.id,
             name=f"Baseline Team {t_data['team_index']}",
-            status="Draft"
+            generation_method="baseline",
+            status="Proposed"
         )
         db.add(team_entity)
         db.flush()
         for m in t_data["members"]:
-            rec = m.get("recommended_role") or {}
+            rec = m.get("assigned_role") or {}
             tm = TeamMember(
                 team_id=team_entity.id,
                 profile_id=m["profile_id"],
@@ -134,11 +135,11 @@ def main():
     ml_run = TeamGenerationRun(
         project_id=proj.id,
         method="ml",
-        algorithm_type="Scikit-Learn KMeans Clustering",
         weights_json="{}",
-        parameters_json='{"n_clusters": 4, "random_state": 42}',
-        total_students=len(eligible),
-        formed_teams_count=len(ml_res["teams"]),
+        random_seed=42,
+        n_teams=len(ml_res["teams"]),
+        n_students_assigned=len(eligible),
+        n_students_unassigned=0,
         runtime_seconds=ml_res["runtime_seconds"]
     )
     db.add(ml_run)
@@ -150,12 +151,13 @@ def main():
             project_id=proj.id,
             run_id=ml_run.id,
             name=f"AI/ML Team {t_data['team_index']}",
-            status="Draft"
+            generation_method="ml",
+            status="Proposed"
         )
         db.add(team_entity)
         db.flush()
         for m in t_data["members"]:
-            rec = m.get("recommended_role") or {}
+            rec = m.get("assigned_role") or {}
             tm = TeamMember(
                 team_id=team_entity.id,
                 profile_id=m["profile_id"],
