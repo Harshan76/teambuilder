@@ -33,7 +33,7 @@
                         <div class="col-12 col-md-4">
                             <label for="department" class="form-label fw-semibold text-dark">Academic Department *</label>
                             <select class="form-select" id="department" name="department" required>
-                                {% for dept in ["Computer Science", "Software Engineering", "Data Science", "Information Technology", "Artificial Intelligence", "Design & Computing"] %}
+                                {% for dept in ALL_DEPARTMENTS %}
                                     <option value="{{ dept }}" {% if profile and profile.department == dept %}selected{% endif %}>{{ dept }}</option>
                                 {% endfor %}
                             </select>
@@ -80,8 +80,12 @@
                                 </label>
                                 <select id="skill-select-dropdown" class="form-select form-select-sm">
                                     <option value="">-- Choose a Technical Skill to Add --</option>
-                                    {% for s in catalogs.skills %}
-                                        <option value="{{ s.id }}" data-name="{{ s.name }}" data-category="{{ s.category }}">{{ s.name }} ({{ s.category }})</option>
+                                    {% for cat, cat_skills in catalogs.skills|groupby('category') %}
+                                        <optgroup label="{{ cat }}">
+                                            {% for s in cat_skills %}
+                                                <option value="{{ s.id }}" data-name="{{ s.name }}" data-category="{{ s.category }}">{{ s.name }}</option>
+                                            {% endfor %}
+                                        </optgroup>
                                     {% endfor %}
                                 </select>
                             </div>
@@ -146,6 +150,10 @@
                                         <strong>{{ interest.name }}</strong>
                                     </label>
                                 </div>
+                            {% else %}
+                                <div class="alert alert-light border small text-muted p-2">
+                                    <i class="bi bi-info-circle me-1"></i>No domain interests configured yet.
+                                </div>
                             {% endfor %}
                         </div>
                     </div>
@@ -167,6 +175,10 @@
                                         <div class="text-muted" style="font-size: 0.72rem;">{{ slot.time_range }}</div>
                                     </label>
                                 </div>
+                            {% else %}
+                                <div class="alert alert-light border small text-muted p-2">
+                                    <i class="bi bi-info-circle me-1"></i>No availability slots configured yet.
+                                </div>
                             {% endfor %}
                         </div>
                     </div>
@@ -187,6 +199,8 @@
                                     <option value="">-- Select 1st Choice (Recommended) --</option>
                                     {% for r in catalogs.roles %}
                                         <option value="{{ r.id }}" {% if selected_roles.get(1) == r.id %}selected{% endif %}>{{ r.name }}</option>
+                                    {% else %}
+                                        <option value="" disabled>No roles available</option>
                                     {% endfor %}
                                 </select>
                             </div>
@@ -197,6 +211,8 @@
                                     <option value="">-- Optional 2nd Choice --</option>
                                     {% for r in catalogs.roles %}
                                         <option value="{{ r.id }}" {% if selected_roles.get(2) == r.id %}selected{% endif %}>{{ r.name }}</option>
+                                    {% else %}
+                                        <option value="" disabled>No roles available</option>
                                     {% endfor %}
                                 </select>
                             </div>
@@ -207,6 +223,8 @@
                                     <option value="">-- Optional 3rd Choice --</option>
                                     {% for r in catalogs.roles %}
                                         <option value="{{ r.id }}" {% if selected_roles.get(3) == r.id %}selected{% endif %}>{{ r.name }}</option>
+                                    {% else %}
+                                        <option value="" disabled>No roles available</option>
                                     {% endfor %}
                                 </select>
                             </div>
@@ -256,6 +274,53 @@ document.addEventListener("DOMContentLoaded", function () {
     const jsonPayloadInput = document.getElementById("skills-json-payload");
     const hiddenInputsContainer = document.getElementById("hidden-skill-inputs");
     const profileForm = document.querySelector("form");
+
+    // Dynamic Self-Healing: If technical skills dropdown has 0 or only placeholder option, fetch from API
+    function verifyAndHealSkillsCatalog() {
+        if (!skillSelect) return;
+        const optionCount = skillSelect.querySelectorAll("option").length;
+        if (optionCount <= 1) {
+            if (feedbackBox) {
+                feedbackBox.style.display = "block";
+                feedbackBox.className = "small mt-2 text-primary fw-semibold";
+                feedbackBox.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Loading technical skills catalog...';
+            }
+            fetch("/api/student/skills")
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success && Array.isArray(data.catalog) && data.catalog.length > 0) {
+                        skillSelect.innerHTML = '<option value="">-- Choose a Technical Skill to Add --</option>';
+                        const grouped = {};
+                        data.catalog.forEach(s => {
+                            const cat = s.category || "General";
+                            if (!grouped[cat]) grouped[cat] = [];
+                            grouped[cat].push(s);
+                        });
+                        Object.keys(grouped).sort().forEach(cat => {
+                            const optgroup = document.createElement("optgroup");
+                            optgroup.label = cat;
+                            grouped[cat].forEach(s => {
+                                const opt = document.createElement("option");
+                                opt.value = s.id;
+                                opt.dataset.name = s.name;
+                                opt.dataset.category = s.category;
+                                opt.textContent = s.name;
+                                optgroup.appendChild(opt);
+                            });
+                            skillSelect.appendChild(optgroup);
+                        });
+                        showFeedback(`Successfully loaded ${data.catalog.length} technical skills.`, true);
+                    } else if (feedbackBox) {
+                        feedbackBox.style.display = "none";
+                    }
+                })
+                .catch(err => {
+                    console.warn("Could not fetch skills catalog:", err);
+                    if (feedbackBox) feedbackBox.style.display = "none";
+                });
+        }
+    }
+    verifyAndHealSkillsCatalog();
 
     function getCategoryClass(cat) {
         if (!cat) return "skill-cat-backend";

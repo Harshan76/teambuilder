@@ -94,6 +94,14 @@ def get_student_skills():
     db = get_db()
     
     all_skills = db.query(Skill).order_by(Skill.category.asc(), Skill.name.asc()).all()
+    if not all_skills:
+        try:
+            from database.seed_data import ensure_master_catalogs
+            ensure_master_catalogs(session=db)
+            all_skills = db.query(Skill).order_by(Skill.category.asc(), Skill.name.asc()).all()
+        except Exception:
+            pass
+
     skills_catalog = [{"id": s.id, "name": s.name, "category": s.category} for s in all_skills]
     
     student_skills = []
@@ -110,6 +118,26 @@ def get_student_skills():
         "success": True,
         "catalog": skills_catalog,
         "selected_skills": student_skills
+    })
+
+@api_bp.route("/catalogs", methods=["GET"])
+@login_required
+def get_all_catalogs_api():
+    """Returns all reference master catalogs including skills, interests, slots, roles, departments, and domains."""
+    from services.student_service import StudentService
+    from models.constants import DEPARTMENTS, DOMAINS, EXPERIENCE_LEVELS, PROFICIENCY_LEVELS
+    db = get_db()
+    cat = StudentService.get_all_catalogs(session=db)
+    return jsonify({
+        "success": True,
+        "skills": [{"id": s.id, "name": s.name, "category": s.category} for s in cat["skills"]],
+        "interests": [{"id": i.id, "name": i.name, "description": i.description} for i in cat["interests"]],
+        "slots": [{"id": sl.id, "slot_name": sl.slot_name, "time_range": sl.time_range} for sl in cat["slots"]],
+        "roles": [{"id": r.id, "name": r.name, "description": r.description, "key_skills_summary": r.key_skills_summary} for r in cat["roles"]],
+        "departments": DEPARTMENTS,
+        "domains": DOMAINS,
+        "experience_levels": EXPERIENCE_LEVELS,
+        "proficiency_levels": PROFICIENCY_LEVELS
     })
 
 @api_bp.route("/student/skills", methods=["POST"])

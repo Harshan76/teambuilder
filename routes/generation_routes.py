@@ -321,6 +321,10 @@ def review_and_edit_teams(run_id):
 
     teams = db.query(Team).filter_by(run_id=run.id).all()
     roles = db.query(Role).all()
+    if not roles:
+        from database.seed_data import ensure_master_catalogs
+        ensure_master_catalogs(session=db)
+        roles = db.query(Role).all()
 
     if request.method == "POST":
         action = request.form.get("action")

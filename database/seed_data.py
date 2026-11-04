@@ -679,10 +679,15 @@ PROJECTS_DATA = [
     }
 ]
 
-def seed_database(session=None):
-    """Populates or updates the database with catalogs, faculty accounts, synthetic student profiles, and demo projects."""
+def ensure_master_catalogs(session=None):
+    """
+    Ensures that reference master catalogs (Skills, Interests, Availability Slots, Roles)
+    are populated and up-to-date in the database.
+    This function is completely idempotent and DOES NOT create or modify any user accounts,
+    student profiles, or demo projects.
+    """
     db = session or get_db()
-    
+
     # 1. Seed Skills
     skill_map = {}
     for item in SKILLS_DATA:
@@ -692,7 +697,8 @@ def seed_database(session=None):
             db.add(s)
             db.flush()
         else:
-            s.category = item["category"]
+            if s.category != item["category"]:
+                s.category = item["category"]
         skill_map[s.name] = s
 
     # 2. Seed Interests
@@ -704,19 +710,22 @@ def seed_database(session=None):
             db.add(i)
             db.flush()
         else:
-            i.description = item["description"]
+            if i.description != item["description"]:
+                i.description = item["description"]
         interest_map[i.name] = i
 
-    # 3. Seed Availability Slots
+    # 3. Seed Availability Slots (dynamically generated for upcoming week in IST)
+    slots_data = get_dynamic_slots_data()
     slot_map = {}
-    for item in SLOTS_DATA:
+    for item in slots_data:
         slot = db.query(AvailabilitySlot).filter_by(slot_name=item["slot_name"]).first()
         if not slot:
             slot = AvailabilitySlot(slot_name=item["slot_name"], time_range=item["time_range"])
             db.add(slot)
             db.flush()
         else:
-            slot.time_range = item["time_range"]
+            if slot.time_range != item["time_range"]:
+                slot.time_range = item["time_range"]
         slot_map[slot.slot_name] = slot
 
     # 4. Seed Roles
@@ -728,9 +737,39 @@ def seed_database(session=None):
             db.add(r)
             db.flush()
         else:
-            r.description = item["description"]
-            r.key_skills_summary = item["key_skills_summary"]
+            if r.description != item["description"] or r.key_skills_summary != item["key_skills_summary"]:
+                r.description = item["description"]
+                r.key_skills_summary = item["key_skills_summary"]
         role_map[r.name] = r
+
+    try:
+        db.commit()
+    except Exception as e:
+        db.rollback()
+        raise e
+
+    return {
+        "skills_count": len(skill_map),
+        "interests_count": len(interest_map),
+        "slots_count": len(slot_map),
+        "roles_count": len(role_map),
+        "skill_map": skill_map,
+        "interest_map": interest_map,
+        "slot_map": slot_map,
+        "role_map": role_map
+    }
+
+
+def seed_database(session=None):
+    """Populates or updates the database with catalogs, faculty accounts, synthetic student profiles, and demo projects."""
+    db = session or get_db()
+    
+    # 1. Ensure Reference Master Catalogs
+    catalogs = ensure_master_catalogs(session=db)
+    skill_map = catalogs["skill_map"]
+    interest_map = catalogs["interest_map"]
+    slot_map = catalogs["slot_map"]
+    role_map = catalogs["role_map"]
 
     # 5. Seed Faculty Users
     faculty_user = db.query(User).filter_by(email="faculty@college.edu").first()

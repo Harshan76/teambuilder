@@ -43,11 +43,15 @@ def create_app(config_class=Config):
     # Context Processor for Global Template Variables
     @app.context_processor
     def inject_user_and_status():
+        from models.constants import DEPARTMENTS, DOMAINS, EXPERIENCE_LEVELS
         user = get_current_user()
         return {
             "current_user": user,
             "db_type": db_manager.db_type,
-            "db_status_message": db_manager.connection_status_message
+            "db_status_message": db_manager.connection_status_message,
+            "ALL_DEPARTMENTS": DEPARTMENTS,
+            "ALL_DOMAINS": DOMAINS,
+            "ALL_EXPERIENCE_LEVELS": EXPERIENCE_LEVELS
         }
 
     # Teardown Application Context: clean up scoped sessions after each request

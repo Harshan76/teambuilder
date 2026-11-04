@@ -110,9 +110,16 @@ class DatabaseManager:
         self.initialized = True
 
     def create_all(self):
-        """Creates all tables declared in SQLAlchemy models safely."""
+        """Creates all tables declared in SQLAlchemy models safely and guarantees master catalogs exist."""
         from models import entities  # ensure models are imported
         Base.metadata.create_all(self.engine)
+        try:
+            from database.seed_data import ensure_master_catalogs
+            session = self.get_session()
+            ensure_master_catalogs(session=session)
+            logger.info("Reference master catalogs verified and ensured.")
+        except Exception as e:
+            logger.warning(f"Could not ensure reference master catalogs during create_all: {e}")
 
     def get_session(self):
         if not getattr(self, "initialized", False):

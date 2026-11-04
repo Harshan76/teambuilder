@@ -198,6 +198,20 @@ class StudentService:
         interests = db.query(Interest).order_by(Interest.name.asc()).all()
         slots = db.query(AvailabilitySlot).order_by(AvailabilitySlot.id.asc()).all()
         roles = db.query(Role).order_by(Role.id.asc()).all()
+
+        # Self-healing: if any master catalog is missing, populate reference tables immediately
+        if not skills or not interests or not slots or not roles:
+            try:
+                from database.seed_data import ensure_master_catalogs
+                ensure_master_catalogs(session=db)
+                skills = db.query(Skill).order_by(Skill.category.asc(), Skill.name.asc()).all()
+                interests = db.query(Interest).order_by(Interest.name.asc()).all()
+                slots = db.query(AvailabilitySlot).order_by(AvailabilitySlot.id.asc()).all()
+                roles = db.query(Role).order_by(Role.id.asc()).all()
+            except Exception as e:
+                import logging
+                logging.getLogger(__name__).warning(f"Auto-healing master catalogs encountered an issue: {e}")
+
         return {
             "skills": skills,
             "interests": interests,

@@ -60,8 +60,10 @@ def students_list():
         session=db
     )
 
-    # Department filter options
-    departments = [d[0] for d in db.query(StudentProfile.department).distinct().all() if d[0]]
+    # Department filter options: combine predefined with existing departments
+    from models.constants import DEPARTMENTS
+    existing_depts = [d[0] for d in db.query(StudentProfile.department).distinct().all() if d[0]]
+    departments = sorted(list(set(DEPARTMENTS + existing_depts)))
 
     return render_template(
         "faculty/students_list.html",

@@ -37,13 +37,11 @@
                             <input type="text" class="form-control" id="student_id" name="student_id" placeholder="STU2026-999">
                         </div>
                         <div class="col-12 col-sm-6">
-                            <label for="department" class="form-label fw-semibold">Department</label>
+                            <label for="department" class="form-label fw-semibold">Academic Department</label>
                             <select class="form-select" id="department" name="department">
-                                <option value="Computer Science" selected>Computer Science</option>
-                                <option value="Software Engineering">Software Engineering</option>
-                                <option value="Data Science">Data Science</option>
-                                <option value="Information Technology">Information Technology</option>
-                                <option value="Artificial Intelligence">Artificial Intelligence</option>
+                                {% for dept in ALL_DEPARTMENTS %}
+                                    <option value="{{ dept }}" {% if dept == 'Computer Science' %}selected{% endif %}>{{ dept }}</option>
+                                {% endfor %}
                             </select>
                         </div>
                     </div>

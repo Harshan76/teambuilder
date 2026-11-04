@@ -29,7 +29,7 @@
                         <div class="col-12 col-md-4">
                             <label for="domain" class="form-label fw-semibold text-dark">Domain / Category *</label>
                             <select class="form-select" id="domain" name="domain" required>
-                                {% for dom in ["Web Application Development", "Machine Learning & Data Science", "Cloud Native & Distributed Systems", "Healthcare & BioInformatics", "FinTech & Blockchain", "Internet of Things (IoT)", "Cybersecurity & Privacy"] %}
+                                {% for dom in ALL_DOMAINS %}
                                     <option value="{{ dom }}" {% if project and project.domain == dom %}selected{% endif %}>{{ dom }}</option>
                                 {% endfor %}
                             </select>
@@ -133,6 +133,12 @@
                                     </div>
                                 </div>
                             </div>
+                        {% else %}
+                            <div class="col-12">
+                                <div class="alert alert-light border text-center text-muted py-3 small">
+                                    <i class="bi bi-info-circle me-1"></i>No team roles found in master catalog.
+                                </div>
+                            </div>
                         {% endfor %}
                     </div>
                 </div>
@@ -166,6 +172,12 @@
                                     <div style="width: 75px;">
                                         <input type="number" min="1" max="5" class="form-control form-control-sm text-center" name="role_count_{{ r.id }}" value="{{ count }}">
                                     </div>
+                                </div>
+                            </div>
+                        {% else %}
+                            <div class="col-12">
+                                <div class="alert alert-light border text-center text-muted py-3 small">
+                                    <i class="bi bi-info-circle me-1"></i>No team roles found in master catalog.
                                 </div>
                             </div>
                         {% endfor %}
